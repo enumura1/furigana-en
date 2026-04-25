@@ -229,23 +229,114 @@ Rules:
     }
   });
 
-  // ---------- Diagnostics ----------
+  // ---------- DOM construction (XSS-safe) ----------
 
-  // Step-3 diagnostic: log candidates and translate the first one.
-  async function debugRun() {
+  // Inject the gloss stylesheet exactly once. Uses textContent, not innerHTML.
+  function injectStyles() {
+    if (document.getElementById("engloss-styles")) return;
+    const style = document.createElement("style");
+    style.id = "engloss-styles";
+    style.textContent = [
+      ".engloss-word { border-bottom: 1px dotted #888; }",
+      ".engloss-ja { color: #0a7; font-size: 0.82em; margin-left: 2px; }"
+    ].join("\n");
+    (document.head || document.documentElement).appendChild(style);
+  }
+
+  // Sanitize incoming glosses: type-check, dedupe by surface, drop hallucinations.
+  function sanitizeGlosses(en, glosses) {
+    const out = [];
+    if (!Array.isArray(glosses)) return out;
+    const seen = new Set();
+    for (const g of glosses) {
+      if (!g || typeof g !== "object") continue;
+      if (typeof g.word !== "string" || typeof g.ja !== "string") continue;
+      if (g.word.length === 0 || g.ja.length === 0) continue;
+      if (!en.includes(g.word)) continue; // hallucination guard
+      if (seen.has(g.word)) continue;
+      seen.add(g.word);
+      out.push({ word: g.word, ja: g.ja });
+    }
+    out.sort((a, b) => b.word.length - a.word.length);
+    return out;
+  }
+
+  // Build a DocumentFragment from an English string + gloss list.
+  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
+  function buildGlossedFragment(en, glosses) {
+    const sorted = sanitizeGlosses(en, glosses);
+    const fragment = document.createDocumentFragment();
+    let remaining = en;
+    let safety = 0;
+
+    while (remaining.length > 0 && safety < 1000) {
+      safety++;
+      let earliest = null;
+      for (const g of sorted) {
+        const idx = remaining.indexOf(g.word);
+        if (idx >= 0 && (earliest === null || idx < earliest.idx)) {
+          earliest = { idx, gloss: g };
+        }
+      }
+      if (!earliest) {
+        fragment.appendChild(document.createTextNode(remaining));
+        return fragment;
+      }
+      if (earliest.idx > 0) {
+        fragment.appendChild(document.createTextNode(remaining.slice(0, earliest.idx)));
+      }
+      const word = document.createElement("span");
+      word.className = "engloss-word";
+      word.appendChild(document.createTextNode(earliest.gloss.word));
+      const ja = document.createElement("span");
+      ja.className = "engloss-ja";
+      ja.appendChild(document.createTextNode("(" + earliest.gloss.ja + ")"));
+      word.appendChild(ja);
+      fragment.appendChild(word);
+      remaining = remaining.slice(earliest.idx + earliest.gloss.word.length);
+    }
+
+    // Defense-in-depth flush in case the safety counter trips.
+    if (remaining.length > 0) {
+      fragment.appendChild(document.createTextNode(remaining));
+    }
+    return fragment;
+  }
+
+  // Swap a paragraph element's children for the glossed fragment, keeping the
+  // original text on a data attribute so restoreAll() can revert later.
+  function replaceParagraph(el, data) {
+    if (!data || typeof data.en !== "string" || data.en.length === 0) return false;
+    const original = el.textContent;
+    el.setAttribute("data-engloss-orig", original);
+    el.setAttribute("data-engloss-done", "1");
+    el.replaceChildren();
+    el.appendChild(buildGlossedFragment(data.en, data.glosses || []));
+    return true;
+  }
+
+  // ---------- End-to-end run (sequential; parallelism lands in step 5) ----------
+
+  // Translate every extracted paragraph and replace its DOM in place.
+  async function runAll() {
+    injectStyles();
     const candidates = extractParagraphs();
-    console.log(`[EN Gloss] ${candidates.length} paragraph(s) extracted`);
+    console.log(`[EN Gloss] ${candidates.length} paragraph(s) to translate`);
+    if (candidates.length === 0) return { count: 0, success: 0, failure: 0 };
+
+    let success = 0;
+    let failure = 0;
     for (const { el, text } of candidates) {
-      console.log(`  - <${el.tagName.toLowerCase()}>`, preview(text));
+      const data = await translateOne(text);
+      if (data && replaceParagraph(el, data)) {
+        success++;
+      } else {
+        failure++;
+      }
     }
-    if (candidates.length === 0) return { count: 0 };
-    const first = candidates[0];
-    console.log("[EN Gloss] translating first paragraph:", preview(first.text));
-    const result = await translateOne(first.text);
-    if (result) {
-      console.log("[EN Gloss] translation result:", result);
-    }
-    return { count: candidates.length, sampleTranslated: result !== null };
+    console.log(`[EN Gloss] done. success=${success} failure=${failure}`);
+    showBanner(`完了。${success}段落を翻訳しました。`, "info", 3000);
+    return { count: candidates.length, success, failure };
   }
 
   // ---------- Message router ----------
@@ -257,7 +348,7 @@ Rules:
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!msg || typeof msg.type !== "string") return false;
     if (msg.type === "ENGLOSS_RUN") {
-      debugRun().then(
+      runAll().then(
         (r) => sendResponse({ ok: true, ...r }),
         (e) => sendResponse({ ok: false, error: String(e) })
       );
