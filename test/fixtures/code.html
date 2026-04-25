@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>EN Gloss Reader fixture: code blocks</title>
+    <style>
+      pre { background: #f4f4f4; padding: 8px; border-radius: 4px; }
+      code { font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <article>
+      <h1>非同期処理の基礎</h1>
+      <p>JavaScript における非同期処理は、コールバック、Promise、async/await の順に進化してきた。</p>
+      <p>以下のコードは、3秒後にメッセージを表示する単純な例である。</p>
+      <pre><code>setTimeout(() =&gt; {
+  console.log("hello world");
+}, 3000);</code></pre>
+      <p>Promise を用いることで、コールバックの入れ子を平坦化できる。</p>
+      <pre><code>fetch("/api")
+  .then(res =&gt; res.json())
+  .then(data =&gt; console.log(data));</code></pre>
+      <p>async/await を使うと、非同期処理を同期処理のように直線的に記述できる。</p>
+      <p>関数 <code>doWork()</code> は内部で <code>await</code> を含む。インライン <code>code</code> も翻訳対象から除外される。</p>
+    </article>
+  </body>
+</html>
