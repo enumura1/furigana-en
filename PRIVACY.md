@@ -1,59 +1,72 @@
-# Privacy Policy / プライバシーポリシー
+# Privacy Policy
 
-EN Gloss Reader (以下「本拡張」) は、利用者のプライバシーを最大限尊重します。
-本拡張は、すべての翻訳処理を Chrome 内蔵の Gemini Nano (Prompt API) を用いて
-端末内で完結させ、外部サーバとの通信を一切行いません。
+EN Gloss Reader (the "extension") is designed to keep all user data on
+the device. Every translation is performed by Chrome's built-in Gemini
+Nano (Prompt API) running locally; the extension never opens a network
+connection of its own.
 
-## 収集するデータ
+## Data collected
 
-本拡張が `chrome.storage.sync` に保存するのは、以下のユーザ設定のみです。
+The only value the extension stores via `chrome.storage.sync` is:
 
-- `autoRun` (boolean): ページ読み込み時に自動で翻訳を行うかどうか
+- `autoRun` (boolean): whether translation should run automatically
+  whenever a page finishes loading.
 
-これらは利用者の Google アカウントに紐付く Chrome の同期機能を経由して
-端末間で同期されます。本拡張の開発者が読み取ることはできません。
+Because it lives in `chrome.storage.sync`, this flag follows the user
+across devices through Chrome's standard sync feature. The extension's
+author cannot read it.
 
-## ページ本文の取り扱い
+## Page contents
 
-- 拡張アイコン → "このページで実行" を押した時点で、対象タブの本文段落
-  (HTML の `<p>`、`<li>`、`<blockquote>`、`<dd>`、`<dt>`、`<h1>`〜`<h6>`)
-  をブラウザのメモリ内で読み取ります。
-- 読み取った本文は **Chrome 内蔵 Gemini Nano にローカルで渡され**、
-  英訳と難単語の日本語訳を生成します。
-- **外部サーバへの送信は行いません。** `fetch`、`XMLHttpRequest`、`WebSocket`
-  などのネットワーク API は本拡張のソースコード上に存在しません。
+- When you click **"Run on this page"** (or auto-run is enabled), the
+  extension reads the body paragraphs of the active tab — the
+  `<p>`, `<li>`, `<blockquote>`, `<dd>`, `<dt>`, and `<h1>`–`<h6>`
+  elements — into browser memory.
+- That text is handed to **Chrome's built-in Gemini Nano running
+  locally**, which produces the English translation and Japanese
+  glosses.
+- **Nothing is sent to any external server.** The source code contains
+  no `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, or
+  `navigator.sendBeacon` calls.
 
-## 翻訳結果の取り扱い
+## Translation results
 
-- 翻訳結果は対象タブの DOM に直接書き戻され、それ以外には保存されません。
-- ページから離脱、タブを閉じる、またはブラウザを再起動すると消滅します。
-- ローカルストレージ・IndexedDB・キャッシュ等への永続化は行いません。
+- Translations are written directly into the active tab's DOM and live
+  nowhere else.
+- They disappear when you navigate away, close the tab, or restart the
+  browser.
+- Nothing is persisted to `localStorage`, `sessionStorage`, IndexedDB,
+  or any cache.
 
-## 第三者提供
+## Third parties
 
-なし。本拡張はいかなる第三者にもデータを提供しません。
+None. The extension does not share data with any third party.
 
-## アナリティクス・トラッキング
+## Analytics and tracking
 
-なし。本拡張は計測 SDK、テレメトリ、解析タグを一切組み込んでいません。
+None. The extension contains no analytics SDK, telemetry, or tracking
+pixel.
 
-## Cookie・認証情報
+## Cookies and credentials
 
-本拡張は `document.cookie` を読み取らず、フォーム入力 (`<input>`、`<textarea>`
-など) の値も読み取りません。`tabs`、`cookies`、`history`、`webRequest`、
-`identity` などの権限は要求しません。
+The extension does not read `document.cookie`, and it does not read the
+values of form fields (`<input>`, `<textarea>`, etc.). It does not
+request the `tabs`, `cookies`, `history`, `webRequest`, or `identity`
+permissions.
 
-要求する権限は以下のとおりです。
+The permissions it does request are:
 
-- `storage` — 上記ユーザ設定の保存
-- `activeTab` — popup から「実行」を押した時点のタブにのみアクセス
-- `scripting` — content script の再注入のみ
+- `storage` — to persist the user setting described above.
+- `activeTab` — to act on the tab the user explicitly invoked the
+  popup on.
+- `scripting` — to re-inject the content script if the active tab
+  pre-existed the extension's installation.
 
-## 連絡先
+## Contact
 
-本ポリシーに関するご質問は、本リポジトリの
-[Issues](https://github.com/enumura1/furigana-en/issues) までお寄せください。
+Questions about this policy can be filed in the project's
+[GitHub Issues](https://github.com/enumura1/furigana-en/issues).
 
-## 改訂履歴
+## Changelog
 
-- 2026-04-26: 初版
+- 2026-04-26: Initial version.

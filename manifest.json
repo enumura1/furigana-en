@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "EN Gloss Reader",
   "version": "0.1.0",
-  "description": "日本語ページを英訳し、難語に日本語訳を添える英語学習向け拡張。Chrome内蔵Gemini Nanoでローカル処理、外部送信ゼロ。",
+  "description": "Translate Japanese pages into English and gloss CEFR-B2+ words with Japanese in parentheses. Runs entirely on Chrome's built-in Gemini Nano — zero external traffic.",
   "minimum_chrome_version": "140",
   "permissions": ["storage", "activeTab", "scripting"],
   "action": {

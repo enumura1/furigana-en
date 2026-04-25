@@ -1,70 +1,87 @@
 # EN Gloss Reader
 
-日本語のWebページを Chrome 内蔵の Gemini Nano (Prompt API) で英訳し、
-英訳の中で CEFR B2 以上の難単語にだけ日本語訳をカッコ書きで併記する Chrome 拡張です。
-英語学習者が普段読んでいる日本語記事を、難語で詰まらずに英語で読む練習に使えます。
+A Chrome extension that translates Japanese web pages into English using
+Chrome's built-in Gemini Nano (Prompt API), and appends a short Japanese
+gloss in parentheses next to every CEFR-B2-or-above word in the
+translation. Aimed at Japanese learners of English who want to keep
+reading the Japanese articles they already enjoy, but in English, without
+getting stuck on unfamiliar vocabulary.
 
-> 例: 「アルゴリズムは顕著な収束性を示す」が、ページ上で
-> 「The algorithm exhibits(示す) remarkable(注目に値する) convergence(収束) properties.」
-> のように置換されます。
+> Example: "アルゴリズムは顕著な収束性を示す" is replaced in place with
+> "The algorithm exhibits(示す) remarkable(注目に値する) convergence(収束) properties."
 
-すべての処理は端末内 (Chrome 内蔵の Gemini Nano) で行われ、
-**外部サーバとの通信は一切ありません。**詳細は [PRIVACY.md](./PRIVACY.md) を参照してください。
+All processing happens on-device through Chrome's bundled Gemini Nano.
+**No data is sent to any external server.** See [PRIVACY.md](./PRIVACY.md)
+for details.
 
-## 動作要件
+## Requirements
 
-- Google Chrome 140 以降 (デスクトップ版)
-- Prompt API (Gemini Nano) が利用可能なデバイス
-  - 22GB 以上のストレージ空き容量
-  - 4GB 以上の VRAM (GPU 推奨)
-  - メータリング接続でない安定した回線 (初回モデルダウンロード時)
-- 詳細は Chrome 公式ドキュメント
-  ([Prompt API](https://developer.chrome.com/docs/ai/prompt-api)) を参照
+- Google Chrome 140 or later (desktop only)
+- A device that can run the Prompt API / Gemini Nano:
+  - 22 GB or more of free storage
+  - 4 GB or more of VRAM (a GPU is recommended)
+  - A stable, non-metered network connection for the initial model
+    download
+- See Chrome's [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api)
+  for the canonical, up-to-date hardware and platform matrix.
 
-## インストール (開発版)
+## Install (development build)
 
-1. このリポジトリをクローンします。
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/enumura1/furigana-en.git
    ```
 
-2. Chrome で `chrome://extensions/` を開き、右上の "デベロッパーモード" を有効化。
-3. "パッケージ化されていない拡張機能を読み込む" を押し、クローンしたディレクトリ
-   (`manifest.json` がある階層) を選択。
-4. アドレスバー右の拡張アイコンをピン留めしておくと便利です。
+2. Open `chrome://extensions/` in Chrome and toggle **Developer mode**
+   in the top-right corner.
+3. Click **Load unpacked** and select the cloned directory (the one
+   containing `manifest.json`).
+4. Pin the extension's icon next to the address bar for quick access.
 
-## 使い方
+## Usage
 
-1. 翻訳したい日本語ページを開く。
-2. 拡張アイコンをクリックして popup を開く。
-3. **このページで実行** を押すと、本文段落が英訳に置換され、難単語に日本語訳が付きます。
-4. **元に戻す** を押すと原文に戻ります。
-5. **自動実行** を ON にすると、以後ページ読み込み時に自動で翻訳します
-   (重い処理なので注意)。
+1. Open a Japanese page you want to translate.
+2. Click the extension icon to open its popup.
+3. Press **このページで実行** ("Run on this page") — the body
+   paragraphs will be replaced with their English translations, with
+   Japanese glosses appended to difficult words.
+4. Press **元に戻す** ("Restore") to revert to the original text.
+5. Toggle **自動実行** ("Auto-run") on to translate every page as it
+   loads. This is heavy work — leave it off unless you want it.
 
-初回はモデルのダウンロードが走ることがあります。右上のバナーで進捗を確認できます。
+The first run may trigger a model download. Progress is reported in the
+top-right banner.
 
-## 既知の制限
+## Known limitations
 
-- Chrome 140 未満、モバイル版、Prompt API 非対応端末では動作しません。
-- `chrome://`、`about:`、`view-source:` などの内部ページでは実行できません。
-- 段落単位で翻訳します。文をまたぐ参照や全体の論調までは保証されません。
-- 800 文字を超える段落はスキップされます (コンソール warn)。
-- LLM の出力には誤訳・誤抽出が含まれ得ます。学習補助用途にとどめてください。
-- SPA の動的に追加されるコンテンツは現状取り扱いません (今後の課題)。
+- Will not run on Chrome older than 140, on mobile builds, or on
+  devices that do not support the Prompt API.
+- Cannot run on internal pages such as `chrome://`, `about:`, or
+  `view-source:`.
+- Works one paragraph at a time. Cross-paragraph references and
+  document-wide tone are not preserved.
+- Paragraphs longer than 800 characters are skipped (with a console
+  warning).
+- LLM output may contain mistranslations or missed glosses. Treat the
+  result as a study aid, not a reference translation.
+- SPA-style dynamically inserted content is not handled yet (tracked
+  separately as a follow-up).
 
-## テスト
+## Tests
 
-`test/fixtures/` に手動確認用の HTML サンプルがあります。
-利用方法は [test/fixtures/README.md](./test/fixtures/README.md) を参照してください。
-特に `xss-attempt.html` でプロンプトインジェクションと XSS の安全性を確認できます。
+Manual fixtures live under `test/fixtures/`. See
+[test/fixtures/README.md](./test/fixtures/README.md) for how to run
+them. In particular, `xss-attempt.html` exercises both
+prompt-injection resistance and the renderer's textContent-only DOM
+construction.
 
-## プライバシー
+## Privacy
 
-ページ本文・翻訳結果ともに外部送信せず、保存もしません。
-詳細は [PRIVACY.md](./PRIVACY.md) を参照してください。
+Page bodies and translation results are never transmitted off-device,
+and never persisted. See [PRIVACY.md](./PRIVACY.md) for the full
+statement.
 
-## ライセンス
+## License
 
 MIT
