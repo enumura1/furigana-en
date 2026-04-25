@@ -443,12 +443,37 @@ Rules:
     }
   }
 
+  // ---------- Restore ----------
+
+  // Revert every paragraph the extension has touched back to its original text.
+  // Iterates both committed (data-engloss-done) and pending placeholders so a
+  // restore mid-run still cleans up correctly.
+  function restoreAll() {
+    const targets = document.querySelectorAll(
+      "[data-engloss-done], [data-engloss-pending]"
+    );
+    let restored = 0;
+    for (const el of targets) {
+      const orig = el.getAttribute("data-engloss-orig");
+      if (orig !== null) {
+        el.replaceChildren(document.createTextNode(orig));
+      }
+      el.removeAttribute("data-engloss-done");
+      el.removeAttribute("data-engloss-pending");
+      el.removeAttribute("data-engloss-orig");
+      restored++;
+    }
+    console.log(`[EN Gloss] restored ${restored} paragraph(s)`);
+    if (restored > 0) {
+      showBanner(`${restored}段落を元に戻しました。`, "done", 2500);
+    } else {
+      showBanner("元に戻す対象がありません", "info", 2500);
+    }
+    return { restored };
+  }
+
   // ---------- Message router ----------
 
-  // Popup ships in step 6. To trigger ENGLOSS_RUN now, open the extension's
-  // service-worker DevTools (chrome://extensions -> service worker) and run:
-  //   chrome.tabs.query({active:true,currentWindow:true})
-  //     .then(t => chrome.tabs.sendMessage(t[0].id, {type:"ENGLOSS_RUN"}))
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!msg || typeof msg.type !== "string") return false;
     if (msg.type === "ENGLOSS_RUN") {
@@ -457,6 +482,15 @@ Rules:
         (e) => sendResponse({ ok: false, error: String(e) })
       );
       return true;
+    }
+    if (msg.type === "ENGLOSS_RESTORE") {
+      try {
+        const r = restoreAll();
+        sendResponse({ ok: true, ...r });
+      } catch (e) {
+        sendResponse({ ok: false, error: String(e) });
+      }
+      return false;
     }
     return false;
   });
