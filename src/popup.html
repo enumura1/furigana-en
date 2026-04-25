@@ -6,7 +6,36 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <div id="root"></div>
+    <h1>EN Gloss Reader</h1>
+
+    <div id="error" class="error hidden" role="alert"></div>
+
+    <label class="row">
+      <input type="checkbox" id="auto-run" />
+      <span>自動実行（ページ読み込み時に翻訳）</span>
+    </label>
+    <p class="hint">※ 自動実行は読み込み時に重い処理が走ります。</p>
+
+    <div class="actions">
+      <button type="button" id="run">このページで実行</button>
+      <button type="button" id="restore">元に戻す</button>
+    </div>
+
+    <hr />
+
+    <p class="info">
+      Chrome 140+ デスクトップ版が必要です。すべての処理はローカルで実行され、外部送信は行いません。
+    </p>
+    <p>
+      <a
+        id="privacy-link"
+        href="https://github.com/enumura1/furigana-en/blob/main/PRIVACY.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        >プライバシーポリシー</a
+      >
+    </p>
+
     <script src="popup.js"></script>
   </body>
 </html>

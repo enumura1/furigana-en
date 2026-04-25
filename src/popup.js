@@ -1,9 +1,100 @@
-// EN Gloss Reader popup. Step 1 placeholder — real UI lands in step 6.
+// EN Gloss Reader popup script. Bridges user clicks to the active tab's
+// content script and persists settings via chrome.storage.sync.
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const root = document.getElementById("root");
-  const placeholder = document.createElement("p");
-  placeholder.textContent = "EN Gloss Reader (placeholder)";
-  root.appendChild(placeholder);
-});
+(function () {
+  const errorEl = document.getElementById("error");
+  const runBtn = document.getElementById("run");
+  const restoreBtn = document.getElementById("restore");
+  const autoRunBox = document.getElementById("auto-run");
+
+  // Show the inline error banner at the top of the popup.
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.classList.remove("hidden");
+  }
+
+  // Clear the inline error banner.
+  function clearError() {
+    errorEl.textContent = "";
+    errorEl.classList.add("hidden");
+  }
+
+  // Read the active tab in the current window. activeTab permission scopes this
+  // to just the tab the user is currently looking at.
+  async function getActiveTab() {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tabs[0] || null;
+  }
+
+  // Pages where content scripts cannot run.
+  function isUnsupportedUrl(url) {
+    if (!url) return true;
+    if (url === "about:blank") return true;
+    return /^(chrome|chrome-extension|edge|about|view-source|file|devtools):/i.test(url);
+  }
+
+  // Send a message to the tab's content script. If the script was never
+  // injected (e.g. the tab pre-existed extension install), inject it once
+  // via chrome.scripting and retry.
+  async function sendWithReinject(tabId, msg) {
+    try {
+      return await chrome.tabs.sendMessage(tabId, msg);
+    } catch (_) {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ["src/content.js"],
+      });
+      return await chrome.tabs.sendMessage(tabId, msg);
+    }
+  }
+
+  // Common dispatcher for run / restore buttons.
+  async function dispatch(type) {
+    clearError();
+    let tab;
+    try {
+      tab = await getActiveTab();
+    } catch (e) {
+      showError("タブの取得に失敗しました: " + (e && e.message ? e.message : e));
+      return;
+    }
+    if (!tab || typeof tab.id !== "number") {
+      showError("アクティブなタブが見つかりません");
+      return;
+    }
+    if (isUnsupportedUrl(tab.url)) {
+      showError("このページでは利用できません（chrome:// など）");
+      return;
+    }
+    try {
+      await sendWithReinject(tab.id, { type: type });
+      window.close();
+    } catch (e) {
+      showError("コンテンツスクリプトに接続できません: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  // Initialize: hydrate the auto-run toggle from storage and wire handlers.
+  async function init() {
+    try {
+      const data = await chrome.storage.sync.get({ autoRun: false });
+      autoRunBox.checked = !!data.autoRun;
+    } catch (e) {
+      console.error("[EN Gloss popup] storage read failed", e);
+    }
+
+    autoRunBox.addEventListener("change", async () => {
+      try {
+        await chrome.storage.sync.set({ autoRun: autoRunBox.checked });
+      } catch (e) {
+        console.error("[EN Gloss popup] storage write failed", e);
+      }
+    });
+
+    runBtn.addEventListener("click", () => dispatch("ENGLOSS_RUN"));
+    restoreBtn.addEventListener("click", () => dispatch("ENGLOSS_RESTORE"));
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
