@@ -117,23 +117,49 @@ Rules:
     return result;
   }
 
-  // ---------- Status banner (minimal; full UI lands in step 5) ----------
+  // ---------- Status banner ----------
 
-  // Render or update the floating status banner.
-  function showBanner(message, kind, autoDismissMs) {
+  // Build the banner shell (text node + close button) lazily and once.
+  function ensureBanner() {
     let banner = document.getElementById("engloss-banner");
-    if (!banner) {
-      banner = document.createElement("div");
-      banner.id = "engloss-banner";
-      banner.style.cssText = [
-        "position:fixed", "top:12px", "right:12px", "z-index:2147483647",
-        "padding:8px 12px", "border-radius:6px", "font:13px/1.4 -apple-system,sans-serif",
-        "color:#fff", "box-shadow:0 2px 8px rgba(0,0,0,0.2)", "max-width:320px"
-      ].join(";");
-      (document.body || document.documentElement).appendChild(banner);
-    }
-    banner.style.background = kind === "error" ? "#c0392b" : "#2c3e50";
-    banner.textContent = message;
+    if (banner) return banner;
+    banner = document.createElement("div");
+    banner.id = "engloss-banner";
+    banner.style.cssText = [
+      "position:fixed", "top:12px", "right:12px", "z-index:2147483647",
+      "padding:8px 28px 8px 12px", "border-radius:6px",
+      "font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif",
+      "color:#fff", "box-shadow:0 2px 8px rgba(0,0,0,0.2)",
+      "max-width:320px", "min-width:180px", "display:flex", "align-items:center"
+    ].join(";");
+    const text = document.createElement("span");
+    text.id = "engloss-banner-text";
+    text.style.cssText = "flex:1";
+    banner.appendChild(text);
+    const close = document.createElement("button");
+    close.type = "button";
+    close.textContent = "×";
+    close.setAttribute("aria-label", "閉じる");
+    close.style.cssText = [
+      "position:absolute", "top:4px", "right:6px",
+      "background:transparent", "border:0", "color:#fff",
+      "font-size:16px", "line-height:1", "cursor:pointer", "padding:2px 6px"
+    ].join(";");
+    close.addEventListener("click", () => banner.remove());
+    banner.appendChild(close);
+    (document.body || document.documentElement).appendChild(banner);
+    return banner;
+  }
+
+  // Render or update the floating status banner. kind: "info" | "error" | "done".
+  function showBanner(message, kind, autoDismissMs) {
+    const banner = ensureBanner();
+    let bg = "#2c3e50";
+    if (kind === "error") bg = "#c0392b";
+    else if (kind === "done") bg = "#27ae60";
+    banner.style.background = bg;
+    const text = banner.querySelector("#engloss-banner-text");
+    if (text) text.textContent = message;
     if (banner._dismissTimer) {
       clearTimeout(banner._dismissTimer);
       banner._dismissTimer = null;
@@ -305,38 +331,116 @@ Rules:
 
   // Swap a paragraph element's children for the glossed fragment, keeping the
   // original text on a data attribute so restoreAll() can revert later.
+  // If a placeholder already stashed the original on data-engloss-orig, keep it
+  // (otherwise we'd capture the placeholder text "[翻訳中…] ..." by mistake).
   function replaceParagraph(el, data) {
     if (!data || typeof data.en !== "string" || data.en.length === 0) return false;
-    const original = el.textContent;
-    el.setAttribute("data-engloss-orig", original);
+    if (!el.hasAttribute("data-engloss-orig")) {
+      el.setAttribute("data-engloss-orig", el.textContent);
+    }
     el.setAttribute("data-engloss-done", "1");
+    el.removeAttribute("data-engloss-pending");
     el.replaceChildren();
     el.appendChild(buildGlossedFragment(data.en, data.glosses || []));
     return true;
   }
 
-  // ---------- End-to-end run (sequential; parallelism lands in step 5) ----------
+  // ---------- Placeholders ----------
 
-  // Translate every extracted paragraph and replace its DOM in place.
-  async function runAll() {
-    injectStyles();
-    const candidates = extractParagraphs();
-    console.log(`[EN Gloss] ${candidates.length} paragraph(s) to translate`);
-    if (candidates.length === 0) return { count: 0, success: 0, failure: 0 };
+  // Replace the element's children with a half-opacity "[翻訳中…] {original}"
+  // marker and stash the original text so we can revert on failure.
+  function showInProgress(el, original) {
+    el.setAttribute("data-engloss-orig", original);
+    el.setAttribute("data-engloss-pending", "1");
+    el.replaceChildren();
+    const wrap = document.createElement("span");
+    wrap.style.opacity = "0.5";
+    wrap.appendChild(document.createTextNode("[翻訳中…] " + original));
+    el.appendChild(wrap);
+  }
 
-    let success = 0;
-    let failure = 0;
-    for (const { el, text } of candidates) {
-      const data = await translateOne(text);
-      if (data && replaceParagraph(el, data)) {
-        success++;
-      } else {
-        failure++;
+  // Restore the element's original text content on failure and clear markers.
+  function restoreInProgress(el) {
+    const original = el.getAttribute("data-engloss-orig");
+    if (original !== null) {
+      el.replaceChildren(document.createTextNode(original));
+    }
+    el.removeAttribute("data-engloss-pending");
+    el.removeAttribute("data-engloss-orig");
+  }
+
+  // ---------- Worker pool ----------
+
+  // Run worker(item) over all items with bounded concurrency.
+  async function runWithConcurrency(items, limit, worker) {
+    const results = new Array(items.length);
+    let next = 0;
+    async function lane() {
+      while (true) {
+        const idx = next++;
+        if (idx >= items.length) return;
+        try {
+          results[idx] = await worker(items[idx], idx);
+        } catch (e) {
+          results[idx] = { error: e };
+        }
       }
     }
-    console.log(`[EN Gloss] done. success=${success} failure=${failure}`);
-    showBanner(`完了。${success}段落を翻訳しました。`, "info", 3000);
-    return { count: candidates.length, success, failure };
+    const lanes = [];
+    for (let i = 0; i < Math.min(limit, items.length); i++) lanes.push(lane());
+    await Promise.all(lanes);
+    return results;
+  }
+
+  // ---------- End-to-end run with parallelism ----------
+
+  let runInFlight = false;
+  const CONCURRENCY = 2;
+
+  // Translate every extracted paragraph in parallel (cap=2) with progress UI.
+  async function runAll() {
+    if (runInFlight) {
+      console.log("[EN Gloss] run already in flight, ignoring");
+      return { count: 0, success: 0, failure: 0, skipped: true };
+    }
+    runInFlight = true;
+    try {
+      injectStyles();
+      const candidates = extractParagraphs();
+      console.log(`[EN Gloss] ${candidates.length} paragraph(s) to translate`);
+      if (candidates.length === 0) {
+        showBanner("翻訳対象の段落が見つかりませんでした", "info", 3000);
+        return { count: 0, success: 0, failure: 0 };
+      }
+
+      let done = 0;
+      let success = 0;
+      let failure = 0;
+      const total = candidates.length;
+      showBanner(`翻訳中… 0 / ${total}`, "info");
+
+      await runWithConcurrency(candidates, CONCURRENCY, async ({ el, text }) => {
+        showInProgress(el, text);
+        const data = await translateOne(text);
+        if (data && replaceParagraph(el, data)) {
+          success++;
+        } else {
+          restoreInProgress(el);
+          failure++;
+        }
+        done++;
+        showBanner(`翻訳中… ${done} / ${total}`, "info");
+      });
+
+      const msg = failure === 0
+        ? `完了。${success}段落を翻訳しました。`
+        : `完了。成功 ${success} / 失敗 ${failure}（合計 ${total}）`;
+      showBanner(msg, failure === 0 ? "done" : "error", failure === 0 ? 3000 : 0);
+      console.log(`[EN Gloss] done. success=${success} failure=${failure}`);
+      return { count: total, success, failure };
+    } finally {
+      runInFlight = false;
+    }
   }
 
   // ---------- Message router ----------
