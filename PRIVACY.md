@@ -77,5 +77,3 @@ Questions about this policy can be filed in the project's
 ## Changelog
 
 - 2026-04-26: Initial version.
-- 2026-04-26: Storage key updated from `autoRun` (global) to
-  `siteAutoRun` (per-host map). In-memory cache disclosure added.
