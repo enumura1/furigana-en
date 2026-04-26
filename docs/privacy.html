@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — EN Gloss Reader</title>
+    <meta
+      name="description"
+      content="Privacy policy for EN Gloss Reader. All translation runs on-device through Chrome's built-in Gemini Nano. No external servers, no analytics, no persisted translations."
+    />
+    <link rel="icon" type="image/png" sizes="48x48" href="./assets/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="./assets/icon-128.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;700;800&family=Shippori+Mincho:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-nav shell">
+      <div class="site-nav__inner">
+        <a class="wordmark" href="./index.html" aria-label="EN Gloss Reader top">
+          <img src="./assets/icon-48.png" alt="" width="28" height="28" />
+          <span>EN Gloss Reader</span>
+        </a>
+        <span class="site-nav__meta" aria-hidden="true">Privacy · v0.1.0</span>
+      </div>
+    </header>
+
+    <main class="shell-narrow" style="padding-top: 4rem; padding-bottom: 2rem;">
+      <article class="prose">
+        <h1>Privacy Policy</h1>
+        <span class="updated">Last updated · 2026-04-26</span>
+
+        <p>
+          EN Gloss Reader (the "extension") is designed to keep all user data on
+          the device. Every translation is performed by Chrome's built-in Gemini
+          Nano (Prompt API) running locally; the extension never opens a network
+          connection of its own.
+        </p>
+
+        <h2>Data collected</h2>
+        <p>The only value the extension stores via <code>chrome.storage.sync</code> is:</p>
+        <ul>
+          <li>
+            <code>siteAutoRun</code> (object: <code>{ [host]: boolean }</code>):
+            a per-host map of which sites the user has opted into automatic
+            translation on. Only hosts the user has explicitly toggled on are
+            present in the map. Other hosts are unaffected.
+          </li>
+        </ul>
+        <p>
+          Because it lives in <code>chrome.storage.sync</code>, this map follows
+          the user across devices through Chrome's standard sync feature. The
+          extension's author cannot read it.
+        </p>
+
+        <h2>Page contents</h2>
+        <ul>
+          <li>
+            When you click <strong>"Run on this page"</strong> (or auto-run is
+            enabled), the extension reads the body paragraphs of the active tab
+            — the <code>&lt;p&gt;</code>, <code>&lt;li&gt;</code>,
+            <code>&lt;blockquote&gt;</code>, <code>&lt;dd&gt;</code>,
+            <code>&lt;dt&gt;</code>, and <code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code>
+            elements — into browser memory.
+          </li>
+          <li>
+            That text is handed to <strong>Chrome's built-in Gemini Nano running
+            locally</strong>, which produces the English translation and Japanese
+            glosses.
+          </li>
+          <li>
+            <strong>Nothing is sent to any external server.</strong> The source
+            code contains no <code>fetch</code>, <code>XMLHttpRequest</code>,
+            <code>WebSocket</code>, <code>EventSource</code>, or
+            <code>navigator.sendBeacon</code> calls.
+          </li>
+        </ul>
+
+        <h2>Translation results</h2>
+        <ul>
+          <li>
+            Translations are written directly into the active tab's DOM and live
+            nowhere else.
+          </li>
+          <li>
+            For performance, parsed translation results are also held in an
+            in-memory cache keyed by the original Japanese paragraph. This cache
+            exists only as a JavaScript <code>Map</code> inside the content
+            script, lives only while the tab is open, and is cleared on the
+            <code>pagehide</code> event.
+          </li>
+          <li>
+            All in-memory state — the live DOM, the cache, and the
+            LanguageModel session itself — disappears when you navigate away,
+            close the tab, or restart the browser.
+          </li>
+          <li>
+            Nothing is persisted to <code>localStorage</code>,
+            <code>sessionStorage</code>, IndexedDB, HTTP caches, or any other
+            long-lived storage.
+          </li>
+        </ul>
+
+        <h2>Third parties</h2>
+        <p>None. The extension does not share data with any third party.</p>
+
+        <h2>Analytics and tracking</h2>
+        <p>
+          None. The extension contains no analytics SDK, telemetry, or tracking
+          pixel.
+        </p>
+
+        <h2>Cookies and credentials</h2>
+        <p>
+          The extension does not read <code>document.cookie</code>, and it does
+          not read the values of form fields (<code>&lt;input&gt;</code>,
+          <code>&lt;textarea&gt;</code>, etc.). It does not request the
+          <code>tabs</code>, <code>cookies</code>, <code>history</code>,
+          <code>webRequest</code>, or <code>identity</code> permissions.
+        </p>
+        <p>The permissions it does request are:</p>
+        <ul>
+          <li>
+            <code>storage</code> — to persist the user setting described above.
+          </li>
+          <li>
+            <code>activeTab</code> — to act on the tab the user explicitly
+            invoked the popup on.
+          </li>
+          <li>
+            <code>scripting</code> — to re-inject the content script if the
+            active tab pre-existed the extension's installation.
+          </li>
+        </ul>
+
+        <h2>Contact</h2>
+        <p>
+          Questions about this policy can be filed in the project's
+          <a
+            href="https://github.com/enumura1/furigana-en/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub Issues</a
+          >.
+        </p>
+
+        <h2>Changelog</h2>
+        <p class="changelog">2026-04-26 · Initial version.</p>
+      </article>
+    </main>
+
+    <footer class="site-foot">
+      <div class="shell site-foot__inner">
+        <div>
+          <p class="site-foot__title">EN Gloss Reader</p>
+          <p class="site-foot__note">
+            日本語のページを英語で読みたい人のための、Chrome 拡張。
+            通信なし、保存なし、ローカル処理のみ。
+          </p>
+        </div>
+        <div>
+          <p class="site-foot__heading">Project</p>
+          <ul class="site-foot__list">
+            <li>
+              <a
+                href="https://github.com/enumura1/furigana-en"
+                target="_blank"
+                rel="noopener noreferrer"
+                >GitHub リポジトリ</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/enumura1/furigana-en/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Issues</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/enumura1/furigana-en/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                >MIT License</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p class="site-foot__heading">Policy</p>
+          <ul class="site-foot__list">
+            <li><a href="./privacy.html">プライバシーポリシー</a></li>
+            <li>
+              <a
+                href="https://developer.chrome.com/docs/ai/prompt-api"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Prompt API（Chrome 公式）</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="shell site-foot__bottom">
+        <span>© 2026 enumura1</span>
+        <span>Made for slow reading.</span>
+      </div>
+    </footer>
+  </body>
+</html>
