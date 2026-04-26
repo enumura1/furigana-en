@@ -207,6 +207,10 @@ Rules:
       const session = await self.LanguageModel.create({
         expectedInputLanguages: ["ja", "en"],
         expectedOutputLanguages: ["en", "ja"],
+        // Greedy decoding: deterministic output, slightly lower latency,
+        // and cache hits become useful (same input -> same translation).
+        temperature: 0,
+        topK: 1,
         initialPrompts: [{ role: "system", content: SYSTEM_PROMPT }],
         monitor(m) {
           m.addEventListener("downloadprogress", (e) => {
@@ -226,28 +230,77 @@ Rules:
     }
   }
 
-  // Translate one paragraph; returns parsed {en, glosses[]} or null on failure.
-  async function translateOne(jaText) {
-    const session = await getSession();
-    if (!session) return null;
-    const userMessage = `<INPUT>\n${jaText}\n</INPUT>`;
-    let raw;
+  // Tab-scoped, in-memory cache of parsed translation results. Keyed by the
+  // original Japanese text. Cleared on pagehide. NEVER persisted to storage
+  // (spec invariants #11/#12 forbid storing page bodies or translations).
+  const translationCache = new Map();
+
+  // Recover the partial English string from a streaming JSON snapshot. The
+  // schema fixes the field order so "en" arrives before "glosses"; we extract
+  // whatever is currently inside the "en":"..." quote, decoding JSON escapes.
+  function extractPartialEn(jsonText) {
+    const m = jsonText.match(/"en"\s*:\s*"((?:[^"\\]|\\.)*)/);
+    if (!m) return null;
+    let raw = m[1];
+    // Drop a trailing partial escape sequence (e.g. lone backslash) that would
+    // crash JSON.parse mid-stream.
+    raw = raw.replace(/\\$/, "");
     try {
-      raw = await session.prompt(userMessage, { responseConstraint: RESPONSE_SCHEMA });
-    } catch (e) {
-      console.error("[EN Gloss] prompt failed", e);
-      return null;
-    }
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      console.error("[EN Gloss] JSON parse failed for:", preview(raw || ""), e);
+      return JSON.parse('"' + raw + '"');
+    } catch (_) {
       return null;
     }
   }
 
-  // Release the session when the tab unloads.
+  // Translate one paragraph. Returns parsed {en, glosses[]} or null on failure.
+  // onProgress(partialEn) is invoked as text streams in; it may run zero times
+  // on cache hits or single-shot fallback paths.
+  async function translateOne(jaText, onProgress) {
+    if (translationCache.has(jaText)) {
+      console.log("[EN Gloss] cache hit:", preview(jaText));
+      return translationCache.get(jaText);
+    }
+    const session = await getSession();
+    if (!session) return null;
+    const userMessage = `<INPUT>\n${jaText}\n</INPUT>`;
+
+    let acc = "";
+    try {
+      const stream = session.promptStreaming(
+        userMessage,
+        { responseConstraint: RESPONSE_SCHEMA }
+      );
+      for await (const chunk of stream) {
+        // Some Chrome versions emit deltas, others emit the full snapshot
+        // each tick. Detect and normalize so acc always holds the snapshot.
+        if (chunk.length >= acc.length && chunk.startsWith(acc)) {
+          acc = chunk;
+        } else {
+          acc += chunk;
+        }
+        if (onProgress) {
+          const partial = extractPartialEn(acc);
+          if (partial) onProgress(partial);
+        }
+      }
+    } catch (e) {
+      console.error("[EN Gloss] streaming failed", e);
+      return null;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(acc);
+    } catch (e) {
+      console.error("[EN Gloss] JSON parse failed for:", preview(acc || ""), e);
+      return null;
+    }
+    translationCache.set(jaText, parsed);
+    return parsed;
+  }
+
+  // Release the session and drop the cache when the tab unloads.
   window.addEventListener("pagehide", () => {
+    translationCache.clear();
     if (sessionInstance) {
       try { sessionInstance.destroy(); } catch (_) { /* ignore */ }
       sessionInstance = null;
@@ -359,6 +412,18 @@ Rules:
     el.appendChild(wrap);
   }
 
+  // Replace the placeholder with the partial English translation as it streams.
+  // Bails if the element has already been finalized or restored.
+  function updateInProgressText(el, partialEn) {
+    if (!el.hasAttribute("data-engloss-pending")) return;
+    if (typeof partialEn !== "string" || partialEn.length === 0) return;
+    el.replaceChildren();
+    const wrap = document.createElement("span");
+    wrap.style.opacity = "0.7";
+    wrap.appendChild(document.createTextNode(partialEn));
+    el.appendChild(wrap);
+  }
+
   // Restore the element's original text content on failure and clear markers.
   function restoreInProgress(el) {
     const original = el.getAttribute("data-engloss-orig");
@@ -421,7 +486,9 @@ Rules:
 
       await runWithConcurrency(candidates, CONCURRENCY, async ({ el, text }) => {
         showInProgress(el, text);
-        const data = await translateOne(text);
+        const data = await translateOne(text, (partial) => {
+          updateInProgressText(el, partial);
+        });
         if (data && replaceParagraph(el, data)) {
           success++;
         } else {
