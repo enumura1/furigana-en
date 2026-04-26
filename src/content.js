@@ -26,7 +26,6 @@ Your task:
 2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher — words a Japanese university-entrance-exam graduate (共通テスト level) would NOT confidently know. Be generous here: when a word might trip up such a reader, gloss it. Aim for roughly one to three glosses per typical sentence; a sentence with only basic vocabulary may have none.
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
-5. Identify the SUBJECT noun phrase of each main clause in your English translation. Return them in document order (the same order they appear in "en"). EXACTLY ONE subject per main clause — the noun phrase the main verb of that clause agrees with grammatically.
 
 Gloss examples (DO):
 - "entrust" -> 委ねる
@@ -46,29 +45,9 @@ Verb examples (DO include in "verbs"):
 - Multi-word verb phrases: keep them together as one entry ("has been used", not ["has", "been", "used"]).
 - Always populate "verbs" — every paragraph has at least one main verb. An empty "verbs" array is almost always wrong.
 
-Subject rules (read carefully):
-- Return the FULL subject noun phrase, not just the head noun or pronoun. Include determiners ("the", "a"), adjectives ("new", "large"), prepositional modifiers ("of the model"), and relative clauses ("that learn from data"). Bare-pronoun subjects ("It", "She", "They") are correct only when the original sentence really does have just a pronoun there.
-- DO NOT include direct objects, indirect objects, or noun phrases inside prepositional phrases. In "Researchers study models", the subject is "Researchers" — NOT "models".
-- DO NOT include subjects of subordinate / relative / embedded clauses on their own. They are part of the surrounding subject noun phrase, not separate entries.
-- DO NOT include the same noun phrase twice as a subject for one clause.
-- For imperative sentences with no explicit subject ("Consider X."), return nothing for that clause.
-- The subject ALWAYS comes BEFORE the main verb of its clause. If a candidate phrase comes after the verb, it is NOT a subject — skip it.
-- When in doubt, prefer the LONGER fuller phrase over a shorter fragment. A missing subject is better than a fragmentary one.
-
-Examples (notice how multi-word subjects stay intact):
-- "The algorithm exhibits remarkable properties." -> subjects: ["The algorithm"]
-- "The new convergence algorithm exhibits remarkable behavior." -> subjects: ["The new convergence algorithm"]
-- "Researchers at the lab study large language models." -> subjects: ["Researchers at the lab"]   (NOT just "Researchers")
-- "It is widely used in practice." -> subjects: ["It"]
-- "Despite challenges, the field of generative AI has grown rapidly." -> subjects: ["the field of generative AI"]
-- "Models that learn from raw data have advanced significantly." -> subjects: ["Models that learn from raw data"]
-- "The interpretability of large neural networks remains an open question." -> subjects: ["The interpretability of large neural networks"]
-- "Consider the following example." -> subjects: []
-- "The team published a paper, and the community responded." -> subjects: ["The team", "the community"]
-
 Rules:
 - Pick the SURFACE form of the word as it appears in your English translation, preserving its inflection (e.g., "exhibited" not "exhibit").
-- The "word" field MUST appear verbatim in the "en" field. The "verbs" and "subjects" entries MUST also appear verbatim in "en".
+- The "word" field MUST appear verbatim in the "en" field. The "verbs" entries MUST also appear verbatim in "en".
 - Skip proper nouns (people, places, brands, product names).
 - Skip very common words even if technically B2 (e.g., "however", "important").
 - Skip numbers, code identifiers, and technical jargon that has no clean Japanese gloss.
@@ -77,7 +56,7 @@ Rules:
 
   const RESPONSE_SCHEMA = {
     type: "object",
-    required: ["en", "glosses", "verbs", "subjects"],
+    required: ["en", "glosses", "verbs"],
     additionalProperties: false,
     properties: {
       en: { type: "string" },
@@ -96,10 +75,6 @@ Rules:
       verbs: {
         type: "array",
         items: { type: "string", minLength: 1, maxLength: 40 }
-      },
-      subjects: {
-        type: "array",
-        items: { type: "string", minLength: 1, maxLength: 120 }
       }
     }
   };
@@ -347,9 +322,8 @@ Rules:
     // catch without manually inspecting each rendered paragraph.
     const gn = Array.isArray(parsed.glosses) ? parsed.glosses.length : 0;
     const vn = Array.isArray(parsed.verbs) ? parsed.verbs.length : 0;
-    const sn = Array.isArray(parsed.subjects) ? parsed.subjects.length : 0;
     console.log(
-      `[EN Gloss] result: glosses=${gn} verbs=${vn} subjects=${sn} ::`,
+      `[EN Gloss] result: glosses=${gn} verbs=${vn} ::`,
       preview(parsed.en || "")
     );
     translationCache.set(jaText, parsed);
@@ -379,11 +353,7 @@ Rules:
       // which keeps reading flow continuous and stops the parenthetical clutter.
       "ruby.engloss-word { ruby-position: under; ruby-align: center; }",
       "ruby.engloss-word > rt.engloss-ja { color: #0a7; font-size: 0.62em; font-weight: normal; }",
-      ".engloss-verb { color: #ec4899; font-weight: 600; }",
-      // Lavender highlight tape under the subject. Distinct from the pink verb
-      // tint and the green ruby gloss color (no muddy yellow/green overlap),
-      // strong enough alpha to read as a deliberate highlight.
-      ".engloss-subject { background-color: rgba(196, 181, 253, 0.45); border-radius: 2px; padding: 0 2px; }"
+      ".engloss-verb { color: #ec4899; font-weight: 600; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
@@ -493,126 +463,21 @@ Rules:
     return ruby;
   }
 
-  // Split `en` into sentence ranges using ".", "!", "?" followed by whitespace
-  // and a capital letter as boundaries. Imperfect on abbreviations like "Mr."
-  // but adequate for the translated prose we get from the model.
-  function splitSentences(en) {
-    const sentences = [];
-    const re = /[.!?]\s+(?=[A-Z])/g;
-    let lastStart = 0;
-    let m;
-    while ((m = re.exec(en)) !== null) {
-      sentences.push({ start: lastStart, end: m.index + 1 });
-      lastStart = re.lastIndex;
-    }
-    if (lastStart < en.length) {
-      sentences.push({ start: lastStart, end: en.length });
-    }
-    if (sentences.length === 0 && en.length > 0) {
-      sentences.push({ start: 0, end: en.length });
-    }
-    return sentences;
-  }
-
-  // Sorted positions of every verb-surface occurrence in `en` (word-bounded).
-  function collectVerbPositions(en, verbs) {
-    const positions = [];
-    if (!Array.isArray(verbs)) return positions;
-    const seen = new Set();
-    for (const v of verbs) {
-      if (typeof v !== "string" || !v || seen.has(v)) continue;
-      seen.add(v);
-      let re;
-      try {
-        re = new RegExp("\\b" + escapeRegex(v) + "\\b", "g");
-      } catch (_) { continue; }
-      let m;
-      while ((m = re.exec(en)) !== null) {
-        positions.push(m.index);
-        if (m.index === re.lastIndex) re.lastIndex++;
-      }
-    }
-    positions.sort((a, b) => a - b);
-    return positions;
-  }
-
-  // Walk the subject array greedily through `en`, advancing a cursor past
-  // each match so identical surface forms ("It") in different sentences
-  // each anchor to their own occurrence. Subjects the model hallucinated
-  // (no longer present in `en`) are silently dropped. Subjects whose match
-  // sits AFTER a verb in the same sentence are also dropped — a real
-  // sentence subject precedes the main verb of its clause.
-  function collectSubjectSpans(en, subjects, verbs) {
-    if (!Array.isArray(subjects)) return [];
-    const sentences = splitSentences(en);
-    const verbPositions = collectVerbPositions(en, verbs);
-    const spans = [];
-    let cursor = 0;
-    for (const s of subjects) {
-      if (typeof s !== "string" || s.length === 0 || s.length > 120) continue;
-      const idx = en.indexOf(s, cursor);
-      if (idx < 0) continue;
-      const sent = sentences.find((snt) => idx >= snt.start && idx < snt.end);
-      if (sent) {
-        const verbBefore = verbPositions.some(
-          (vp) => vp >= sent.start && vp < idx
-        );
-        if (verbBefore) {
-          cursor = idx + s.length;
-          continue;
-        }
-      }
-      spans.push({ start: idx, end: idx + s.length });
-      cursor = idx + s.length;
-    }
-    return spans;
-  }
-
-  // Render plain English text plus its gloss/verb intervals into `parent`.
-  // Used both at the top level and recursively inside a subject wrapper.
-  function appendInlineFragment(parent, text, glosses, verbs) {
-    const intervals = collectIntervals(text, glosses, verbs);
+  // Build a DocumentFragment from an English string + gloss/verb lists.
+  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
+  function buildGlossedFragment(en, glosses, verbs) {
+    const intervals = collectIntervals(en, glosses, verbs);
+    const fragment = document.createDocumentFragment();
     let pos = 0;
     for (const iv of intervals) {
       if (iv.start > pos) {
-        parent.appendChild(document.createTextNode(text.slice(pos, iv.start)));
+        fragment.appendChild(document.createTextNode(en.slice(pos, iv.start)));
       }
-      parent.appendChild(buildIntervalSpan(iv));
+      fragment.appendChild(buildIntervalSpan(iv));
       pos = iv.end;
     }
-    if (pos < text.length) {
-      parent.appendChild(document.createTextNode(text.slice(pos)));
-    }
-  }
-
-  // Build a subject wrapper: a soft-blue highlighted span around the subject
-  // text, with gloss/verb annotations still applied to the words inside.
-  function buildSubjectElement(text, glosses, verbs) {
-    const wrap = document.createElement("span");
-    wrap.className = "engloss-subject";
-    appendInlineFragment(wrap, text, glosses, verbs);
-    return wrap;
-  }
-
-  // Build a DocumentFragment from an English string + gloss/verb/subject lists.
-  // Subjects are outer wrappers; gloss/verb annotations apply both inside and
-  // outside the subject spans.
-  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
-  function buildGlossedFragment(en, glosses, verbs, subjects) {
-    const subjectSpans = collectSubjectSpans(en, subjects, verbs);
-    const fragment = document.createDocumentFragment();
-    let pos = 0;
-    for (const sp of subjectSpans) {
-      if (sp.start > pos) {
-        appendInlineFragment(fragment, en.slice(pos, sp.start), glosses, verbs);
-      }
-      fragment.appendChild(
-        buildSubjectElement(en.slice(sp.start, sp.end), glosses, verbs)
-      );
-      pos = sp.end;
-    }
     if (pos < en.length) {
-      appendInlineFragment(fragment, en.slice(pos), glosses, verbs);
+      fragment.appendChild(document.createTextNode(en.slice(pos)));
     }
     return fragment;
   }
@@ -632,8 +497,7 @@ Rules:
     el.appendChild(buildGlossedFragment(
       data.en,
       data.glosses || [],
-      data.verbs || [],
-      data.subjects || []
+      data.verbs || []
     ));
     return true;
   }
