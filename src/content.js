@@ -26,7 +26,26 @@ Your task:
 2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher (above standard Japanese university entrance level).
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
-5. Identify the SUBJECT noun phrase of each main clause in your English translation. Return them in document order (the same order they appear in "en"). Examples: "The new algorithm", "It", "Many researchers". Include determiners and adjectives that belong to the subject noun phrase. SKIP subjects of subordinate / relative / embedded clauses — top-level subjects only.
+5. Identify the SUBJECT noun phrase of each main clause in your English translation. Return them in document order (the same order they appear in "en"). EXACTLY ONE subject per main clause — the noun phrase the main verb of that clause agrees with grammatically.
+
+Subject rules (read carefully):
+- DO include determiners and adjectives that belong to the subject noun phrase ("The new algorithm").
+- DO include relative clauses that modify the subject ("Models that learn from data").
+- DO NOT include direct objects, indirect objects, or noun phrases inside prepositional phrases. In "Researchers study models", the subject is "Researchers" — NOT "models".
+- DO NOT include subjects of subordinate / relative / embedded clauses on their own. They are part of the surrounding subject noun phrase, not separate entries.
+- DO NOT include the same noun phrase twice as a subject for one clause.
+- For imperative sentences with no explicit subject ("Consider X."), return nothing for that clause.
+- The subject ALWAYS comes BEFORE the main verb of its clause. If a candidate phrase comes after the verb, it is NOT a subject — skip it.
+- When in doubt, OMIT — a missing subject is better than a wrong one.
+
+Examples:
+- "The algorithm exhibits remarkable properties." -> subjects: ["The algorithm"]
+- "Researchers study large language models." -> subjects: ["Researchers"]   (NOT "large language models")
+- "It is widely used in practice." -> subjects: ["It"]
+- "Despite challenges, the field has grown rapidly." -> subjects: ["the field"]
+- "Models that learn from raw data have advanced significantly." -> subjects: ["Models that learn from raw data"]
+- "Consider the following example." -> subjects: []
+- "The team published a paper, and the community responded." -> subjects: ["The team", "the community"]
 
 Rules:
 - Pick the SURFACE form of the word as it appears in your English translation, preserving its inflection (e.g., "exhibited" not "exhibit").
@@ -443,18 +462,75 @@ Rules:
     return ruby;
   }
 
+  // Split `en` into sentence ranges using ".", "!", "?" followed by whitespace
+  // and a capital letter as boundaries. Imperfect on abbreviations like "Mr."
+  // but adequate for the translated prose we get from the model.
+  function splitSentences(en) {
+    const sentences = [];
+    const re = /[.!?]\s+(?=[A-Z])/g;
+    let lastStart = 0;
+    let m;
+    while ((m = re.exec(en)) !== null) {
+      sentences.push({ start: lastStart, end: m.index + 1 });
+      lastStart = re.lastIndex;
+    }
+    if (lastStart < en.length) {
+      sentences.push({ start: lastStart, end: en.length });
+    }
+    if (sentences.length === 0 && en.length > 0) {
+      sentences.push({ start: 0, end: en.length });
+    }
+    return sentences;
+  }
+
+  // Sorted positions of every verb-surface occurrence in `en` (word-bounded).
+  function collectVerbPositions(en, verbs) {
+    const positions = [];
+    if (!Array.isArray(verbs)) return positions;
+    const seen = new Set();
+    for (const v of verbs) {
+      if (typeof v !== "string" || !v || seen.has(v)) continue;
+      seen.add(v);
+      let re;
+      try {
+        re = new RegExp("\\b" + escapeRegex(v) + "\\b", "g");
+      } catch (_) { continue; }
+      let m;
+      while ((m = re.exec(en)) !== null) {
+        positions.push(m.index);
+        if (m.index === re.lastIndex) re.lastIndex++;
+      }
+    }
+    positions.sort((a, b) => a - b);
+    return positions;
+  }
+
   // Walk the subject array greedily through `en`, advancing a cursor past
   // each match so identical surface forms ("It") in different sentences
-  // each anchor to their own occurrence. Subjects that the model hallucinated
-  // (no longer present in `en`) are silently dropped.
-  function collectSubjectSpans(en, subjects) {
+  // each anchor to their own occurrence. Subjects the model hallucinated
+  // (no longer present in `en`) are silently dropped. Subjects whose match
+  // sits AFTER a verb in the same sentence are also dropped — a real
+  // sentence subject precedes the main verb of its clause.
+  function collectSubjectSpans(en, subjects, verbs) {
     if (!Array.isArray(subjects)) return [];
+    const sentences = splitSentences(en);
+    const verbPositions = collectVerbPositions(en, verbs);
     const spans = [];
     let cursor = 0;
     for (const s of subjects) {
       if (typeof s !== "string" || s.length === 0 || s.length > 120) continue;
       const idx = en.indexOf(s, cursor);
       if (idx < 0) continue;
+      const sent = sentences.find((snt) => idx >= snt.start && idx < snt.end);
+      if (sent) {
+        const verbBefore = verbPositions.some(
+          (vp) => vp >= sent.start && vp < idx
+        );
+        if (verbBefore) {
+          cursor = idx + s.length;
+          continue;
+        }
+      }
       spans.push({ start: idx, end: idx + s.length });
       cursor = idx + s.length;
     }
@@ -500,7 +576,7 @@ Rules:
   // outside the subject spans.
   // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
   function buildGlossedFragment(en, glosses, verbs, subjects) {
-    const subjectSpans = collectSubjectSpans(en, subjects);
+    const subjectSpans = collectSubjectSpans(en, subjects, verbs);
     const fragment = document.createDocumentFragment();
     let pos = 0;
     for (const sp of subjectSpans) {
