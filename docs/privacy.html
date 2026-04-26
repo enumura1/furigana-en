@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Privacy Policy — EN Gloss Reader</title>
+    <title>プライバシーポリシー — EN Gloss Reader</title>
     <meta
       name="description"
-      content="Privacy policy for EN Gloss Reader. All translation runs on-device through Chrome's built-in Gemini Nano. No external servers, no analytics, no persisted translations."
+      content="EN Gloss Reader のプライバシーポリシー。翻訳は Chrome 内蔵 Gemini Nano が端末内で実行し、外部サーバへの送信・解析・保存は一切行いません。"
     />
     <link rel="icon" type="image/png" sizes="48x48" href="./assets/icon-48.png" />
     <link rel="icon" type="image/png" sizes="128x128" href="./assets/icon-128.png" />
@@ -15,36 +15,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;700;800&family=Shippori+Mincho:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="site-nav shell">
-      <div class="site-nav__inner">
-        <a class="wordmark" href="./index.html" aria-label="EN Gloss Reader top">
-          <img src="./assets/icon-48.png" alt="" width="28" height="28" />
+    <header class="site-header">
+      <div class="shell site-header__inner">
+        <a class="brand" href="./index.html" aria-label="EN Gloss Reader トップへ">
+          <img src="./assets/icon-48.png" alt="" width="32" height="32" />
           <span>EN Gloss Reader</span>
         </a>
-        <span class="site-nav__meta" aria-hidden="true">Privacy · v0.1.0</span>
+        <span class="site-header__meta" aria-hidden="true">プライバシー</span>
       </div>
     </header>
 
-    <main class="shell-narrow" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <main class="shell" style="padding-top: 56px; padding-bottom: 24px;">
       <article class="prose">
-        <h1>Privacy Policy</h1>
-        <span class="updated">Last updated · 2026-04-26</span>
+        <h1>プライバシーポリシー</h1>
+        <span class="updated">最終更新 · 2026-04-26</span>
 
-        <p>
+        <div class="ja-summary" lang="ja">
+          <h2>要点 (3 行)</h2>
+          <ul>
+            <li>翻訳はすべて Chrome 内蔵の Gemini Nano が <strong>端末内</strong> で実行します。</li>
+            <li>ページ本文と翻訳結果は <strong>外部サーバへ一切送信されません</strong>。</li>
+            <li><code>chrome.storage.sync</code> に保存するのは「自動翻訳をオンにしたサイトの一覧」のみです。</li>
+          </ul>
+        </div>
+
+        <p lang="en">
           EN Gloss Reader (the "extension") is designed to keep all user data on
           the device. Every translation is performed by Chrome's built-in Gemini
           Nano (Prompt API) running locally; the extension never opens a network
           connection of its own.
         </p>
 
-        <h2>Data collected</h2>
-        <p>The only value the extension stores via <code>chrome.storage.sync</code> is:</p>
-        <ul>
+        <h2 lang="en">Data collected</h2>
+        <p lang="en">The only value the extension stores via <code>chrome.storage.sync</code> is:</p>
+        <ul lang="en">
           <li>
             <code>siteAutoRun</code> (object: <code>{ [host]: boolean }</code>):
             a per-host map of which sites the user has opted into automatic
@@ -52,14 +61,14 @@
             present in the map. Other hosts are unaffected.
           </li>
         </ul>
-        <p>
+        <p lang="en">
           Because it lives in <code>chrome.storage.sync</code>, this map follows
           the user across devices through Chrome's standard sync feature. The
           extension's author cannot read it.
         </p>
 
-        <h2>Page contents</h2>
-        <ul>
+        <h2 lang="en">Page contents</h2>
+        <ul lang="en">
           <li>
             When you click <strong>"Run on this page"</strong> (or auto-run is
             enabled), the extension reads the body paragraphs of the active tab
@@ -81,8 +90,8 @@
           </li>
         </ul>
 
-        <h2>Translation results</h2>
-        <ul>
+        <h2 lang="en">Translation results</h2>
+        <ul lang="en">
           <li>
             Translations are written directly into the active tab's DOM and live
             nowhere else.
@@ -106,25 +115,25 @@
           </li>
         </ul>
 
-        <h2>Third parties</h2>
-        <p>None. The extension does not share data with any third party.</p>
+        <h2 lang="en">Third parties</h2>
+        <p lang="en">None. The extension does not share data with any third party.</p>
 
-        <h2>Analytics and tracking</h2>
-        <p>
+        <h2 lang="en">Analytics and tracking</h2>
+        <p lang="en">
           None. The extension contains no analytics SDK, telemetry, or tracking
           pixel.
         </p>
 
-        <h2>Cookies and credentials</h2>
-        <p>
+        <h2 lang="en">Cookies and credentials</h2>
+        <p lang="en">
           The extension does not read <code>document.cookie</code>, and it does
           not read the values of form fields (<code>&lt;input&gt;</code>,
           <code>&lt;textarea&gt;</code>, etc.). It does not request the
           <code>tabs</code>, <code>cookies</code>, <code>history</code>,
           <code>webRequest</code>, or <code>identity</code> permissions.
         </p>
-        <p>The permissions it does request are:</p>
-        <ul>
+        <p lang="en">The permissions it does request are:</p>
+        <ul lang="en">
           <li>
             <code>storage</code> — to persist the user setting described above.
           </li>
@@ -138,8 +147,8 @@
           </li>
         </ul>
 
-        <h2>Contact</h2>
-        <p>
+        <h2 lang="en">Contact</h2>
+        <p lang="en">
           Questions about this policy can be filed in the project's
           <a
             href="https://github.com/enumura1/furigana-en/issues"
@@ -149,67 +158,19 @@
           >.
         </p>
 
-        <h2>Changelog</h2>
-        <p class="changelog">2026-04-26 · Initial version.</p>
+        <h2 lang="en">Changelog</h2>
+        <p lang="en">2026-04-26 · Initial version.</p>
       </article>
     </main>
 
-    <footer class="site-foot">
-      <div class="shell site-foot__inner">
-        <div>
-          <p class="site-foot__title">EN Gloss Reader</p>
-          <p class="site-foot__note">
-            日本語のページを英語で読みたい人のための、Chrome 拡張。
-            通信なし、保存なし、ローカル処理のみ。
-          </p>
-        </div>
-        <div>
-          <p class="site-foot__heading">Project</p>
-          <ul class="site-foot__list">
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en"
-                target="_blank"
-                rel="noopener noreferrer"
-                >GitHub リポジトリ</a
-              >
-            </li>
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Issues</a
-              >
-            </li>
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en/blob/main/LICENSE"
-                target="_blank"
-                rel="noopener noreferrer"
-                >MIT License</a
-              >
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p class="site-foot__heading">Policy</p>
-          <ul class="site-foot__list">
-            <li><a href="./privacy.html">プライバシーポリシー</a></li>
-            <li>
-              <a
-                href="https://developer.chrome.com/docs/ai/prompt-api"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Prompt API（Chrome 公式）</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="shell site-foot__bottom">
+    <footer class="site-footer">
+      <div class="shell site-footer__inner">
         <span>© 2026 enumura1</span>
-        <span>Made for slow reading.</span>
+        <span class="site-footer__links">
+          <a href="https://github.com/enumura1/furigana-en" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="./index.html">トップ</a>
+          <a href="https://github.com/enumura1/furigana-en/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        </span>
       </div>
     </footer>
   </body>

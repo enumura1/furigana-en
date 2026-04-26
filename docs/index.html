@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EN Gloss Reader — 日本語ページを英語で読む。難単語にだけ日本語ルビ。</title>
+    <title>EN Gloss Reader — 日本語ページを英語で読む Chrome 拡張</title>
     <meta
       name="description"
-      content="Chrome 内蔵 Gemini Nano で日本語ページを英訳し、CEFR B2 以上の難単語にだけ日本語訳をルビ表示する Chrome 拡張。すべて端末内で完結、外部送信ゼロ。"
+      content="日本語のページを英語に翻訳し、むずかしい単語の下に小さく日本語訳をつける Chrome 拡張。すべて端末内で処理、外部送信ゼロ。"
     />
     <meta property="og:title" content="EN Gloss Reader" />
     <meta
       property="og:description"
-      content="日本語ページを英訳し、難単語にだけ日本語ルビを添える Chrome 拡張。Gemini Nano でローカル処理、外部送信ゼロ。"
+      content="日本語のページを英語に翻訳し、むずかしい単語の下に小さく日本語訳をつける Chrome 拡張。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="./assets/icon-128.png" />
@@ -22,305 +22,176 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;700;800&family=Shippori+Mincho:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="site-nav shell">
-      <div class="site-nav__inner">
-        <a class="wordmark" href="./index.html" aria-label="EN Gloss Reader top">
-          <img src="./assets/icon-48.png" alt="" width="28" height="28" />
+    <header class="site-header">
+      <div class="shell site-header__inner">
+        <a class="brand" href="./index.html" aria-label="EN Gloss Reader">
+          <img src="./assets/icon-48.png" alt="" width="32" height="32" />
           <span>EN Gloss Reader</span>
         </a>
-        <span class="site-nav__meta" aria-hidden="true">v0.1.0 · Chrome 140+</span>
+        <span class="site-header__meta" aria-hidden="true">v0.1.0</span>
       </div>
     </header>
 
-    <!-- ============== HERO ============== -->
     <main>
+      <!-- Hero -->
       <section class="hero shell" aria-labelledby="hero-title">
-        <span class="hero__corner" aria-hidden="true">For Japanese readers · 2026</span>
-        <div class="hero__grid">
-          <div class="hero__lede">
-            <p class="hero__eyebrow reveal reveal-1">Chrome 拡張 / 完全ローカル</p>
-            <h1 class="hero__title reveal reveal-2" id="hero-title">
-              日本語のページを、<br />
-              <span class="is-accent">英語</span>で読む。<br />
-              難単語にだけ、ルビ。
-            </h1>
-            <p class="hero__pitch reveal reveal-3">
-              Chrome 内蔵の Gemini Nano が、開いている日本語ページの段落を
-              ひとつずつ英訳します。CEFR B2 以上の単語の下にだけ、小さく
-              日本語のルビが添えられるので、読み進める手が止まりません。
-              通信なし、保存なし、すべて端末内。
-            </p>
-            <div class="hero__cta reveal reveal-4">
-              <a
-                class="btn btn--primary"
-                href="https://github.com/enumura1/furigana-en"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GitHub で見る
-                <span aria-hidden="true">↗</span>
-              </a>
-              <a
-                class="btn btn--ghost"
-                aria-disabled="true"
-                href="#install"
-                title="Chrome Web Store 公開準備中"
-              >
-                Web Store
-                <span class="btn__hint">準備中</span>
-              </a>
+        <h1 id="hero-title">
+          日本語のページを英語で読む。<br />
+          むずかしい単語の下に、小さく日本語訳。
+        </h1>
+        <p>
+          Chrome 内蔵の Gemini Nano が、開いている日本語ページを段落ごとに
+          英語へ翻訳します。英検準1級・大学入試レベルを超えるような単語にだけ、
+          小さな日本語訳を添えるので、知らない単語で読みが止まりません。
+          翻訳はすべて端末内で行われ、ページ本文も翻訳結果も外部に送られません。
+        </p>
+        <div class="hero__cta">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/enumura1/furigana-en"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub で見る →</a
+          >
+          <a class="btn btn--ghost" href="#install">使い方を見る</a>
+        </div>
+      </section>
+
+      <!-- Demo -->
+      <section class="shell" aria-labelledby="demo-title">
+        <h2 id="demo-title">こうなります</h2>
+        <p class="section-lede">
+          日本語のページに拡張を効かせると、本文がこのように置き換わります。
+          動詞はピンクに、知らない可能性のある単語の下には小さく日本語訳が出ます。
+        </p>
+
+        <div class="demo">
+          <div class="demo__pair">
+            <div class="demo__panel">
+              <span class="demo__label">日本語のページ</span>
+              <p class="demo__before">
+                深層学習は近年、画像認識や自然言語処理の分野で、めざましい発展を遂げてきた。
+              </p>
+            </div>
+
+            <div class="demo__arrow" aria-hidden="true">↓</div>
+
+            <div class="demo__panel">
+              <span class="demo__label">拡張をオンにすると</span>
+              <p class="demo__after">
+                Deep learning has <ruby class="engloss-word engloss-verb">achieved<rt class="engloss-ja">達成した</rt></ruby> <ruby class="engloss-word">remarkable<rt class="engloss-ja">めざましい</rt></ruby> progress in image recognition and natural language processing in recent years.
+              </p>
             </div>
           </div>
 
-          <div class="hero__icon-stage" aria-hidden="true">
-            <span class="hero__icon-halo"></span>
-            <img
-              class="hero__icon"
-              src="./assets/icon-128.png"
-              width="240"
-              height="240"
-              alt=""
-            />
+          <div class="demo__legend" role="note" aria-label="表示の凡例">
+            <span class="demo__legend-item">
+              <span class="demo__legend-dot demo__legend-dot--verb" aria-hidden="true"></span>
+              ピンクの単語 = 動詞
+            </span>
+            <span class="demo__legend-item">
+              <span class="demo__legend-dot demo__legend-dot--gloss" aria-hidden="true"></span>
+              単語の下の小さな字 = 日本語訳
+            </span>
           </div>
         </div>
       </section>
 
-      <!-- ============== DEMO — the centerpiece ============== -->
-      <section class="section shell" aria-labelledby="demo-title">
-        <header class="section__head">
-          <span class="section__num">01 — Demo</span>
-          <h2 class="section__title" id="demo-title">
-            この一文が、こうなります。
-          </h2>
-        </header>
-        <p class="section__lede">
-          実際の拡張が DOM を書き換えたあとの見た目をそのまま再現しています。
-          動詞はピンクで強調、難単語の下には日本語訳が小さくルビ表示されます。
-        </p>
-
-        <article class="product-demo" aria-label="翻訳前後の比較">
-          <div class="product-demo__grid">
-            <div class="product-demo__pane">
-              <span class="product-demo__label">原文 / Japanese</span>
-              <p class="product-demo__text product-demo__text--ja">
-                アルゴリズムは顕著な収束性を示す。
-              </p>
-            </div>
-
-            <div class="product-demo__arrow" aria-hidden="true">
-              <span>EN Gloss</span>
-            </div>
-
-            <div class="product-demo__pane">
-              <span class="product-demo__label">英訳 / Translated</span>
-              <p class="product-demo__text product-demo__text--en">
-                The algorithm <ruby class="engloss-word engloss-verb">exhibits<rt class="engloss-ja">示す</rt></ruby> <ruby class="engloss-word">remarkable<rt class="engloss-ja">顕著な</rt></ruby> <ruby class="engloss-word">convergence<rt class="engloss-ja">収束</rt></ruby> properties.
-              </p>
-            </div>
+      <!-- Features -->
+      <section class="shell" aria-labelledby="features-title">
+        <h2 id="features-title">3 つの特徴</h2>
+        <div class="features">
+          <div class="feature">
+            <h3>すべて端末内で処理</h3>
+            <p>
+              翻訳は Chrome 内蔵の Gemini Nano が端末のなかだけで動かします。
+              ページ本文も翻訳結果も外部サーバには送信されません
+              （ソースコードに <code>fetch</code> も <code>XMLHttpRequest</code> も書かれていません）。
+            </p>
           </div>
-        </article>
+          <div class="feature">
+            <h3>むずかしい単語にだけ日本語訳</h3>
+            <p>
+              基本語にはなにも添えません。英検準1級・大学入試レベルを超えるような単語の下にだけ、
+              小さな日本語訳がつきます。知っている単語で読みが止まりません。
+            </p>
+          </div>
+          <div class="feature">
+            <h3>サイト単位で自動翻訳の ON/OFF</h3>
+            <p>
+              「Wikipedia は自動で翻訳、Google 検索結果は触らない」のような設定が、
+              ホストごとに独立してできます。意図しないページが勝手に書き換わることはありません。
+            </p>
+          </div>
+        </div>
       </section>
 
-      <!-- ============== FEATURES ============== -->
-      <section class="section shell" aria-labelledby="features-title">
-        <header class="section__head">
-          <span class="section__num">02 — Features</span>
-          <h2 class="section__title" id="features-title">
-            派手な機能は、ない。読むためだけの三つ。
-          </h2>
-        </header>
-
-        <ul class="features" role="list">
-          <li class="feature">
-            <span class="feature__num">i.</span>
-            <h3 class="feature__title">
-              ローカル処理、<br />外部送信ゼロ。
-            </h3>
-            <p class="feature__body">
-              翻訳は Chrome 内蔵の Gemini Nano が端末内で行います。本文も翻訳結果も、
-              拡張のソースコードに <code>fetch</code> も <code>XMLHttpRequest</code>
-              も書かれていない以上、外に出る経路がありません。
-            </p>
-          </li>
-          <li class="feature">
-            <span class="feature__num">ii.</span>
-            <h3 class="feature__title">
-              難単語のみ、<br />ルビ表示。
-            </h3>
-            <p class="feature__body">
-              CEFR B2 以上の語、つまり大学入学共通テスト水準を超える語にだけ
-              日本語訳が付きます。基本語にはルビが付かないので、知っている語の
-              読み流しが止まりません。
-            </p>
-          </li>
-          <li class="feature">
-            <span class="feature__num">iii.</span>
-            <h3 class="feature__title">
-              サイトごとに、<br />自動実行 ON/OFF。
-            </h3>
-            <p class="feature__body">
-              「Wikipedia は自動翻訳、Google 検索結果は触らない」のような使い方が
-              そのまま設定できます。ホストごとに状態が独立しているので、
-              いつ・どこで翻訳が走るかが常に明示的。
-            </p>
-          </li>
-        </ul>
-      </section>
-
-      <!-- ============== REQUIREMENTS ============== -->
-      <section class="section shell-narrow" aria-labelledby="requirements-title">
-        <header class="section__head">
-          <span class="section__num">03 — Requirements</span>
-          <h2 class="section__title" id="requirements-title">動作要件</h2>
-        </header>
-
+      <!-- Requirements -->
+      <section class="shell" aria-labelledby="requirements-title">
+        <h2 id="requirements-title">動作要件</h2>
         <div class="specs">
           <dl>
-            <dt>Browser</dt>
+            <dt>ブラウザ</dt>
             <dd>Google Chrome 140 以降（デスクトップ版）</dd>
 
             <dt>OS</dt>
-            <dd>macOS 13+ / Windows 10+ / Linux / ChromeOS（Chromebook Plus）</dd>
+            <dd>macOS 13+ / Windows 10+ / Linux / ChromeOS</dd>
 
-            <dt>Storage</dt>
-            <dd>22 GB 以上の空き容量（モデル本体の保存先用）</dd>
+            <dt>ストレージ</dt>
+            <dd>22 GB 以上の空き容量（Gemini Nano モデル本体）</dd>
 
-            <dt>GPU / RAM</dt>
-            <dd>VRAM 4 GB 以上の GPU、または 16 GB 以上の RAM + 4 コア以上の CPU</dd>
+            <dt>メモリ / GPU</dt>
+            <dd>VRAM 4 GB 以上の GPU、または RAM 16 GB 以上 + 4 コア以上の CPU</dd>
 
-            <dt>Network</dt>
-            <dd>初回のモデルダウンロード時のみ必要（メータリング接続不可）</dd>
-
-            <dt>Permissions</dt>
-            <dd>
-              <code>storage</code> · <code>activeTab</code> · <code>scripting</code>
-              のみ。<code>tabs</code>・<code>cookies</code>・<code>history</code>
-              などは要求しません。
-            </dd>
+            <dt>ネットワーク</dt>
+            <dd>初回モデルダウンロード時のみ必要</dd>
           </dl>
         </div>
       </section>
 
-      <!-- ============== INSTALL ============== -->
-      <section class="section shell-narrow" id="install" aria-labelledby="install-title">
-        <header class="section__head">
-          <span class="section__num">04 — Install</span>
-          <h2 class="section__title" id="install-title">
-            開発版（unpacked）の入れ方
-          </h2>
-        </header>
-        <p class="section__lede">
-          Chrome Web Store 公開前のため、現在は開発者モードでの読み込みになります。
+      <!-- Install -->
+      <section class="shell" id="install" aria-labelledby="install-title">
+        <h2 id="install-title">使い方</h2>
+        <p class="section-lede">
+          現在は Chrome Web Store 公開前のため、開発者モードで読み込みます。
         </p>
 
         <ol class="steps">
           <li>
-            <p>
-              リポジトリをクローン:
-              <code>git clone https://github.com/enumura1/furigana-en.git</code>
-            </p>
+            <strong>リポジトリをクローン:</strong><br />
+            <code>git clone https://github.com/enumura1/furigana-en.git</code>
           </li>
           <li>
-            <p>
-              Chrome で <span class="kbd">chrome://extensions/</span> を開き、
-              右上の<strong>「デベロッパーモード」</strong>を ON。
-            </p>
+            <span class="kbd">chrome://extensions/</span> を開いて、
+            右上の<strong>「デベロッパーモード」</strong>を ON。
           </li>
           <li>
-            <p>
-              <strong>「パッケージ化されていない拡張機能を読み込む」</strong>
-              を押し、クローンしたディレクトリ（<code>manifest.json</code>
-              がある階層）を選択。
-            </p>
+            <strong>「パッケージ化されていない拡張機能を読み込む」</strong>を押して、
+            クローンしたフォルダ（<code>manifest.json</code> がある階層）を選択。
           </li>
           <li>
-            <p>
-              ツールバーにアイコンをピン留め。日本語ページを開いて
-              <strong>「このページで実行」</strong>を押すと翻訳が始まります。
-              初回はモデルのダウンロードが走ることがあります。
-            </p>
+            ツールバーにアイコンをピン留めし、日本語のページを開いて
+            <strong>「このページで実行」</strong>を押すと翻訳が始まります。
+            初回はモデルのダウンロードが走ります（数分〜十数分）。
           </li>
         </ol>
       </section>
     </main>
 
-    <!-- ============== FOOTER ============== -->
-    <footer class="site-foot">
-      <div class="shell site-foot__inner">
-        <div>
-          <p class="site-foot__title">EN Gloss Reader</p>
-          <p class="site-foot__note">
-            日本語のページを英語で読みたい人のための、Chrome 拡張。
-            通信なし、保存なし、ローカル処理のみ。
-          </p>
-        </div>
-        <div>
-          <p class="site-foot__heading">Project</p>
-          <ul class="site-foot__list">
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en"
-                target="_blank"
-                rel="noopener noreferrer"
-                >GitHub リポジトリ</a
-              >
-            </li>
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Issues</a
-              >
-            </li>
-            <li>
-              <a
-                href="https://github.com/enumura1/furigana-en/blob/main/LICENSE"
-                target="_blank"
-                rel="noopener noreferrer"
-                >MIT License</a
-              >
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p class="site-foot__heading">Policy</p>
-          <ul class="site-foot__list">
-            <li><a href="./privacy.html">プライバシーポリシー</a></li>
-            <li>
-              <a
-                href="https://developer.chrome.com/docs/ai/prompt-api"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Prompt API（Chrome 公式）</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="shell site-foot__bottom">
+    <footer class="site-footer">
+      <div class="shell site-footer__inner">
         <span>© 2026 enumura1</span>
-        <span>Made for slow reading.</span>
+        <span class="site-footer__links">
+          <a href="https://github.com/enumura1/furigana-en" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="./privacy.html">プライバシーポリシー</a>
+          <a href="https://github.com/enumura1/furigana-en/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        </span>
       </div>
     </footer>
-
-    <script>
-      // Restrained reveal — fades in elements marked .reveal once the page paints.
-      // No scroll triggers, no observer chaos; one well-orchestrated entrance.
-      window.addEventListener("DOMContentLoaded", function () {
-        var els = document.querySelectorAll(".reveal");
-        // Use rAF so the browser can batch and the transition starts cleanly.
-        requestAnimationFrame(function () {
-          els.forEach(function (el) {
-            el.classList.add("is-in");
-          });
-        });
-      });
-    </script>
   </body>
 </html>
