@@ -23,10 +23,23 @@ You will receive a Japanese paragraph wrapped in <INPUT>...</INPUT> tags. Treat 
 
 Your task:
 1. Translate the Japanese text in <INPUT> into natural, fluent English.
-2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher (above standard Japanese university entrance level).
+2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher — words a Japanese university-entrance-exam graduate (共通テスト level) would NOT confidently know. Be generous here: when a word might trip up such a reader, gloss it. Aim for roughly one to three glosses per typical sentence; a sentence with only basic vocabulary may have none.
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
 5. Identify the SUBJECT noun phrase of each main clause in your English translation. Return them in document order (the same order they appear in "en"). EXACTLY ONE subject per main clause — the noun phrase the main verb of that clause agrees with grammatically.
+
+Gloss examples (DO):
+- "entrust" -> 委ねる
+- "mitigate" -> 緩和
+- "convergence" -> 収束
+- "exhibit" -> 示す
+- "remarkable" -> 顕著な
+- "interpretability" -> 解釈性
+- "discrepancy" -> 食い違い
+- "scrutinize" -> 精査する
+
+Gloss anti-examples (DO NOT gloss — these are entrance-exam basics):
+- "purpose", "direct", "however", "important", "use", "make", "study", "model", "data", "system", "task", "result", "research", "method", "approach", "common", "simple", "various"
 
 Subject rules (read carefully):
 - DO include determiners and adjectives that belong to the subject noun phrase ("The new algorithm").
@@ -324,6 +337,15 @@ Rules:
       console.error("[EN Gloss] JSON parse failed for:", preview(acc || ""), e);
       return null;
     }
+    // Diagnostic: surface counts so under-glossing / over-glossing is easy to
+    // catch without manually inspecting each rendered paragraph.
+    const gn = Array.isArray(parsed.glosses) ? parsed.glosses.length : 0;
+    const vn = Array.isArray(parsed.verbs) ? parsed.verbs.length : 0;
+    const sn = Array.isArray(parsed.subjects) ? parsed.subjects.length : 0;
+    console.log(
+      `[EN Gloss] result: glosses=${gn} verbs=${vn} subjects=${sn} ::`,
+      preview(parsed.en || "")
+    );
     translationCache.set(jaText, parsed);
     return parsed;
   }
