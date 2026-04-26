@@ -23,9 +23,6 @@ All processing happens on-device through Chrome's bundled Gemini Nano.
 **No data is sent to any external server.** See [PRIVACY.md](./PRIVACY.md)
 for details.
 
-**Project site**: <https://enumura1.github.io/furigana-en/>
-(landing page + privacy policy hosted via GitHub Pages)
-
 ## Requirements
 
 - Google Chrome 140 or later (desktop only)
