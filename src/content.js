@@ -324,7 +324,7 @@ Rules:
     style.textContent = [
       ".engloss-word { border-bottom: 1px dotted #888; }",
       ".engloss-ja { color: #0a7; font-size: 0.82em; margin-left: 2px; }",
-      ".engloss-verb { color: #7c3aed; font-weight: 600; }"
+      ".engloss-verb { color: #ec4899; font-weight: 600; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
