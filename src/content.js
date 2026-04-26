@@ -25,18 +25,20 @@ Your task:
 1. Translate the Japanese text in <INPUT> into natural, fluent English.
 2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher (above standard Japanese university entrance level).
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
+4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
 
 Rules:
 - Pick the SURFACE form of the word as it appears in your English translation, preserving its inflection (e.g., "exhibited" not "exhibit").
-- The "word" field MUST appear verbatim in the "en" field.
+- The "word" field MUST appear verbatim in the "en" field. The "verbs" entries MUST also appear verbatim in "en".
 - Skip proper nouns (people, places, brands, product names).
 - Skip very common words even if technically B2 (e.g., "however", "important").
 - Skip numbers, code identifiers, and technical jargon that has no clean Japanese gloss.
+- For "verbs": skip pure copula in trivial clauses ("It is X" — skip "is"). Skip bare modals when they stand alone ("can", "will", "may"). Include them when they form part of a verb phrase ("can run" — include the whole phrase).
 - Output ONLY valid JSON. No markdown fences, no explanation, no preamble.`;
 
   const RESPONSE_SCHEMA = {
     type: "object",
-    required: ["en", "glosses"],
+    required: ["en", "glosses", "verbs"],
     additionalProperties: false,
     properties: {
       en: { type: "string" },
@@ -51,6 +53,10 @@ Rules:
             ja:   { type: "string", minLength: 1, maxLength: 20 }
           }
         }
+      },
+      verbs: {
+        type: "array",
+        items: { type: "string", minLength: 1, maxLength: 40 }
       }
     }
   };
@@ -317,67 +323,122 @@ Rules:
     style.id = "engloss-styles";
     style.textContent = [
       ".engloss-word { border-bottom: 1px dotted #888; }",
-      ".engloss-ja { color: #0a7; font-size: 0.82em; margin-left: 2px; }"
+      ".engloss-ja { color: #0a7; font-size: 0.82em; margin-left: 2px; }",
+      ".engloss-verb { color: #7c3aed; font-weight: 600; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
 
-  // Sanitize incoming glosses: type-check, dedupe by surface, drop hallucinations.
-  function sanitizeGlosses(en, glosses) {
-    const out = [];
-    if (!Array.isArray(glosses)) return out;
-    const seen = new Set();
-    for (const g of glosses) {
-      if (!g || typeof g !== "object") continue;
-      if (typeof g.word !== "string" || typeof g.ja !== "string") continue;
-      if (g.word.length === 0 || g.ja.length === 0) continue;
-      if (!en.includes(g.word)) continue; // hallucination guard
-      if (seen.has(g.word)) continue;
-      seen.add(g.word);
-      out.push({ word: g.word, ja: g.ja });
-    }
-    out.sort((a, b) => b.word.length - a.word.length);
-    return out;
+  // Escape any regex metachars so a verb surface form can be embedded in a
+  // word-boundary regex without blowing up on punctuation.
+  function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
-  // Build a DocumentFragment from an English string + gloss list.
-  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
-  function buildGlossedFragment(en, glosses) {
-    const sorted = sanitizeGlosses(en, glosses);
-    const fragment = document.createDocumentFragment();
-    let remaining = en;
-    let safety = 0;
+  // Build a sorted, non-overlapping interval list covering both glosses and
+  // verb spans. Glosses use substring matching (LLM picks specific surface
+  // forms); verbs use word-boundary matching to avoid "is" inside "wisdom".
+  // Identical spans across the two kinds are merged so a verb that is also a
+  // gloss receives both classes plus the Japanese gloss.
+  function collectIntervals(en, glosses, verbs) {
+    const intervals = [];
 
-    while (remaining.length > 0 && safety < 1000) {
-      safety++;
-      let earliest = null;
-      for (const g of sorted) {
-        const idx = remaining.indexOf(g.word);
-        if (idx >= 0 && (earliest === null || idx < earliest.idx)) {
-          earliest = { idx, gloss: g };
+    if (Array.isArray(glosses)) {
+      const seen = new Set();
+      for (const g of glosses) {
+        if (!g || typeof g !== "object") continue;
+        if (typeof g.word !== "string" || typeof g.ja !== "string") continue;
+        if (g.word.length === 0 || g.ja.length === 0) continue;
+        if (seen.has(g.word)) continue;
+        seen.add(g.word);
+        let from = 0;
+        while (from <= en.length) {
+          const idx = en.indexOf(g.word, from);
+          if (idx < 0) break;
+          intervals.push({
+            start: idx, end: idx + g.word.length,
+            kind: "gloss", text: g.word, ja: g.ja
+          });
+          from = idx + g.word.length;
         }
       }
-      if (!earliest) {
-        fragment.appendChild(document.createTextNode(remaining));
-        return fragment;
-      }
-      if (earliest.idx > 0) {
-        fragment.appendChild(document.createTextNode(remaining.slice(0, earliest.idx)));
-      }
-      const word = document.createElement("span");
-      word.className = "engloss-word";
-      word.appendChild(document.createTextNode(earliest.gloss.word));
-      const ja = document.createElement("span");
-      ja.className = "engloss-ja";
-      ja.appendChild(document.createTextNode("(" + earliest.gloss.ja + ")"));
-      word.appendChild(ja);
-      fragment.appendChild(word);
-      remaining = remaining.slice(earliest.idx + earliest.gloss.word.length);
     }
 
-    // Defense-in-depth flush in case the safety counter trips.
-    if (remaining.length > 0) {
-      fragment.appendChild(document.createTextNode(remaining));
+    if (Array.isArray(verbs)) {
+      const seen = new Set();
+      for (const v of verbs) {
+        if (typeof v !== "string" || v.length === 0 || v.length > 40) continue;
+        if (seen.has(v)) continue;
+        seen.add(v);
+        let re;
+        try {
+          re = new RegExp("\\b" + escapeRegex(v) + "\\b", "g");
+        } catch (_) { continue; }
+        let m;
+        while ((m = re.exec(en)) !== null) {
+          intervals.push({
+            start: m.index, end: m.index + v.length,
+            kind: "verb", text: v
+          });
+          if (m.index === re.lastIndex) re.lastIndex++; // zero-width safety
+        }
+      }
+    }
+
+    // Order by start; longer wins on tie so a multi-word verb shadows
+    // any nested single-word verb starting at the same position.
+    intervals.sort((a, b) =>
+      a.start - b.start || (b.end - b.start) - (a.end - a.start)
+    );
+
+    // Resolve overlaps. Identical span + different kind = merge into "both";
+    // any other overlap drops the later interval (the earlier/longer wins).
+    const resolved = [];
+    for (const iv of intervals) {
+      const last = resolved[resolved.length - 1];
+      if (!last || iv.start >= last.end) {
+        resolved.push(iv);
+        continue;
+      }
+      if (iv.start === last.start && iv.end === last.end && iv.kind !== last.kind) {
+        last.kind = "both";
+        if (iv.kind === "gloss") last.ja = iv.ja;
+      }
+    }
+    return resolved;
+  }
+
+  // Build a single span for one resolved interval.
+  function buildIntervalSpan(iv) {
+    const span = document.createElement("span");
+    if (iv.kind === "gloss") span.className = "engloss-word";
+    else if (iv.kind === "verb") span.className = "engloss-verb";
+    else span.className = "engloss-word engloss-verb";
+    span.appendChild(document.createTextNode(iv.text));
+    if (iv.ja) {
+      const sub = document.createElement("span");
+      sub.className = "engloss-ja";
+      sub.appendChild(document.createTextNode("(" + iv.ja + ")"));
+      span.appendChild(sub);
+    }
+    return span;
+  }
+
+  // Build a DocumentFragment from an English string + gloss/verb lists.
+  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
+  function buildGlossedFragment(en, glosses, verbs) {
+    const intervals = collectIntervals(en, glosses, verbs);
+    const fragment = document.createDocumentFragment();
+    let pos = 0;
+    for (const iv of intervals) {
+      if (iv.start > pos) {
+        fragment.appendChild(document.createTextNode(en.slice(pos, iv.start)));
+      }
+      fragment.appendChild(buildIntervalSpan(iv));
+      pos = iv.end;
+    }
+    if (pos < en.length) {
+      fragment.appendChild(document.createTextNode(en.slice(pos)));
     }
     return fragment;
   }
@@ -394,7 +455,7 @@ Rules:
     el.setAttribute("data-engloss-done", "1");
     el.removeAttribute("data-engloss-pending");
     el.replaceChildren();
-    el.appendChild(buildGlossedFragment(data.en, data.glosses || []));
+    el.appendChild(buildGlossedFragment(data.en, data.glosses || [], data.verbs || []));
     return true;
   }
 
