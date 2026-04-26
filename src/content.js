@@ -42,21 +42,22 @@ Gloss anti-examples (DO NOT gloss — these are entrance-exam basics):
 - "purpose", "direct", "however", "important", "use", "make", "study", "model", "data", "system", "task", "result", "research", "method", "approach", "common", "simple", "various"
 
 Subject rules (read carefully):
-- DO include determiners and adjectives that belong to the subject noun phrase ("The new algorithm").
-- DO include relative clauses that modify the subject ("Models that learn from data").
+- Return the FULL subject noun phrase, not just the head noun or pronoun. Include determiners ("the", "a"), adjectives ("new", "large"), prepositional modifiers ("of the model"), and relative clauses ("that learn from data"). Bare-pronoun subjects ("It", "She", "They") are correct only when the original sentence really does have just a pronoun there.
 - DO NOT include direct objects, indirect objects, or noun phrases inside prepositional phrases. In "Researchers study models", the subject is "Researchers" — NOT "models".
 - DO NOT include subjects of subordinate / relative / embedded clauses on their own. They are part of the surrounding subject noun phrase, not separate entries.
 - DO NOT include the same noun phrase twice as a subject for one clause.
 - For imperative sentences with no explicit subject ("Consider X."), return nothing for that clause.
 - The subject ALWAYS comes BEFORE the main verb of its clause. If a candidate phrase comes after the verb, it is NOT a subject — skip it.
-- When in doubt, OMIT — a missing subject is better than a wrong one.
+- When in doubt, prefer the LONGER fuller phrase over a shorter fragment. A missing subject is better than a fragmentary one.
 
-Examples:
+Examples (notice how multi-word subjects stay intact):
 - "The algorithm exhibits remarkable properties." -> subjects: ["The algorithm"]
-- "Researchers study large language models." -> subjects: ["Researchers"]   (NOT "large language models")
+- "The new convergence algorithm exhibits remarkable behavior." -> subjects: ["The new convergence algorithm"]
+- "Researchers at the lab study large language models." -> subjects: ["Researchers at the lab"]   (NOT just "Researchers")
 - "It is widely used in practice." -> subjects: ["It"]
-- "Despite challenges, the field has grown rapidly." -> subjects: ["the field"]
+- "Despite challenges, the field of generative AI has grown rapidly." -> subjects: ["the field of generative AI"]
 - "Models that learn from raw data have advanced significantly." -> subjects: ["Models that learn from raw data"]
+- "The interpretability of large neural networks remains an open question." -> subjects: ["The interpretability of large neural networks"]
 - "Consider the following example." -> subjects: []
 - "The team published a paper, and the community responded." -> subjects: ["The team", "the community"]
 
@@ -374,7 +375,10 @@ Rules:
       "ruby.engloss-word { ruby-position: under; ruby-align: center; }",
       "ruby.engloss-word > rt.engloss-ja { color: #0a7; font-size: 0.62em; font-weight: normal; }",
       ".engloss-verb { color: #ec4899; font-weight: 600; }",
-      ".engloss-subject .engloss-bracket { color: #2563eb; font-weight: 700; margin: 0 1px; }"
+      // Soft sky-blue highlight tape under the subject. Distinct from the pink
+      // verb tint and the green ruby gloss color, low enough alpha to keep
+      // body text comfortably readable.
+      ".engloss-subject { background-color: rgba(56, 189, 248, 0.18); border-radius: 2px; padding: 0 2px; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
@@ -576,20 +580,12 @@ Rules:
     }
   }
 
-  // Build a subject wrapper: blue brackets around the subject text, with
-  // gloss/verb annotations still applied to the words inside.
+  // Build a subject wrapper: a soft-blue highlighted span around the subject
+  // text, with gloss/verb annotations still applied to the words inside.
   function buildSubjectElement(text, glosses, verbs) {
     const wrap = document.createElement("span");
     wrap.className = "engloss-subject";
-    const open = document.createElement("span");
-    open.className = "engloss-bracket";
-    open.appendChild(document.createTextNode("["));
-    wrap.appendChild(open);
     appendInlineFragment(wrap, text, glosses, verbs);
-    const close = document.createElement("span");
-    close.className = "engloss-bracket";
-    close.appendChild(document.createTextNode("]"));
-    wrap.appendChild(close);
     return wrap;
   }
 
