@@ -26,10 +26,11 @@ Your task:
 2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher (above standard Japanese university entrance level).
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
+5. Identify the SUBJECT noun phrase of each main clause in your English translation. Return them in document order (the same order they appear in "en"). Examples: "The new algorithm", "It", "Many researchers". Include determiners and adjectives that belong to the subject noun phrase. SKIP subjects of subordinate / relative / embedded clauses — top-level subjects only.
 
 Rules:
 - Pick the SURFACE form of the word as it appears in your English translation, preserving its inflection (e.g., "exhibited" not "exhibit").
-- The "word" field MUST appear verbatim in the "en" field. The "verbs" entries MUST also appear verbatim in "en".
+- The "word" field MUST appear verbatim in the "en" field. The "verbs" and "subjects" entries MUST also appear verbatim in "en".
 - Skip proper nouns (people, places, brands, product names).
 - Skip very common words even if technically B2 (e.g., "however", "important").
 - Skip numbers, code identifiers, and technical jargon that has no clean Japanese gloss.
@@ -38,7 +39,7 @@ Rules:
 
   const RESPONSE_SCHEMA = {
     type: "object",
-    required: ["en", "glosses", "verbs"],
+    required: ["en", "glosses", "verbs", "subjects"],
     additionalProperties: false,
     properties: {
       en: { type: "string" },
@@ -57,6 +58,10 @@ Rules:
       verbs: {
         type: "array",
         items: { type: "string", minLength: 1, maxLength: 40 }
+      },
+      subjects: {
+        type: "array",
+        items: { type: "string", minLength: 1, maxLength: 120 }
       }
     }
   };
@@ -327,7 +332,8 @@ Rules:
       // which keeps reading flow continuous and stops the parenthetical clutter.
       "ruby.engloss-word { ruby-position: under; ruby-align: center; }",
       "ruby.engloss-word > rt.engloss-ja { color: #0a7; font-size: 0.62em; font-weight: normal; }",
-      ".engloss-verb { color: #ec4899; font-weight: 600; }"
+      ".engloss-verb { color: #ec4899; font-weight: 600; }",
+      ".engloss-subject .engloss-bracket { color: #2563eb; font-weight: 700; margin: 0 1px; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
@@ -437,21 +443,77 @@ Rules:
     return ruby;
   }
 
-  // Build a DocumentFragment from an English string + gloss/verb lists.
-  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
-  function buildGlossedFragment(en, glosses, verbs) {
-    const intervals = collectIntervals(en, glosses, verbs);
-    const fragment = document.createDocumentFragment();
+  // Walk the subject array greedily through `en`, advancing a cursor past
+  // each match so identical surface forms ("It") in different sentences
+  // each anchor to their own occurrence. Subjects that the model hallucinated
+  // (no longer present in `en`) are silently dropped.
+  function collectSubjectSpans(en, subjects) {
+    if (!Array.isArray(subjects)) return [];
+    const spans = [];
+    let cursor = 0;
+    for (const s of subjects) {
+      if (typeof s !== "string" || s.length === 0 || s.length > 120) continue;
+      const idx = en.indexOf(s, cursor);
+      if (idx < 0) continue;
+      spans.push({ start: idx, end: idx + s.length });
+      cursor = idx + s.length;
+    }
+    return spans;
+  }
+
+  // Render plain English text plus its gloss/verb intervals into `parent`.
+  // Used both at the top level and recursively inside a subject wrapper.
+  function appendInlineFragment(parent, text, glosses, verbs) {
+    const intervals = collectIntervals(text, glosses, verbs);
     let pos = 0;
     for (const iv of intervals) {
       if (iv.start > pos) {
-        fragment.appendChild(document.createTextNode(en.slice(pos, iv.start)));
+        parent.appendChild(document.createTextNode(text.slice(pos, iv.start)));
       }
-      fragment.appendChild(buildIntervalSpan(iv));
+      parent.appendChild(buildIntervalSpan(iv));
       pos = iv.end;
     }
+    if (pos < text.length) {
+      parent.appendChild(document.createTextNode(text.slice(pos)));
+    }
+  }
+
+  // Build a subject wrapper: blue brackets around the subject text, with
+  // gloss/verb annotations still applied to the words inside.
+  function buildSubjectElement(text, glosses, verbs) {
+    const wrap = document.createElement("span");
+    wrap.className = "engloss-subject";
+    const open = document.createElement("span");
+    open.className = "engloss-bracket";
+    open.appendChild(document.createTextNode("["));
+    wrap.appendChild(open);
+    appendInlineFragment(wrap, text, glosses, verbs);
+    const close = document.createElement("span");
+    close.className = "engloss-bracket";
+    close.appendChild(document.createTextNode("]"));
+    wrap.appendChild(close);
+    return wrap;
+  }
+
+  // Build a DocumentFragment from an English string + gloss/verb/subject lists.
+  // Subjects are outer wrappers; gloss/verb annotations apply both inside and
+  // outside the subject spans.
+  // Strict: createElement + textContent + appendChild only. NEVER innerHTML.
+  function buildGlossedFragment(en, glosses, verbs, subjects) {
+    const subjectSpans = collectSubjectSpans(en, subjects);
+    const fragment = document.createDocumentFragment();
+    let pos = 0;
+    for (const sp of subjectSpans) {
+      if (sp.start > pos) {
+        appendInlineFragment(fragment, en.slice(pos, sp.start), glosses, verbs);
+      }
+      fragment.appendChild(
+        buildSubjectElement(en.slice(sp.start, sp.end), glosses, verbs)
+      );
+      pos = sp.end;
+    }
     if (pos < en.length) {
-      fragment.appendChild(document.createTextNode(en.slice(pos)));
+      appendInlineFragment(fragment, en.slice(pos), glosses, verbs);
     }
     return fragment;
   }
@@ -468,7 +530,12 @@ Rules:
     el.setAttribute("data-engloss-done", "1");
     el.removeAttribute("data-engloss-pending");
     el.replaceChildren();
-    el.appendChild(buildGlossedFragment(data.en, data.glosses || [], data.verbs || []));
+    el.appendChild(buildGlossedFragment(
+      data.en,
+      data.glosses || [],
+      data.verbs || [],
+      data.subjects || []
+    ));
     return true;
   }
 
