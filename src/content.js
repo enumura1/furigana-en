@@ -322,8 +322,11 @@ Rules:
     const style = document.createElement("style");
     style.id = "engloss-styles";
     style.textContent = [
-      ".engloss-word { border-bottom: 1px dotted #888; }",
-      ".engloss-ja { color: #0a7; font-size: 0.82em; margin-left: 2px; }",
+      // <ruby> is the native HTML element for placing an annotation next to
+      // base text. ruby-position: under puts the gloss below instead of after,
+      // which keeps reading flow continuous and stops the parenthetical clutter.
+      "ruby.engloss-word { ruby-position: under; ruby-align: center; }",
+      "ruby.engloss-word > rt.engloss-ja { color: #0a7; font-size: 0.62em; font-weight: normal; }",
       ".engloss-verb { color: #ec4899; font-weight: 600; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
@@ -408,20 +411,30 @@ Rules:
     return resolved;
   }
 
-  // Build a single span for one resolved interval.
+  // Build a single element for one resolved interval. Glosses (and the
+  // gloss-plus-verb "both" case) use a <ruby> element so the Japanese gloss
+  // sits below the English word as ruby annotation, not inline parens.
+  // Verb-only intervals stay as a flat <span>.
   function buildIntervalSpan(iv) {
-    const span = document.createElement("span");
-    if (iv.kind === "gloss") span.className = "engloss-word";
-    else if (iv.kind === "verb") span.className = "engloss-verb";
-    else span.className = "engloss-word engloss-verb";
-    span.appendChild(document.createTextNode(iv.text));
-    if (iv.ja) {
-      const sub = document.createElement("span");
-      sub.className = "engloss-ja";
-      sub.appendChild(document.createTextNode("(" + iv.ja + ")"));
-      span.appendChild(sub);
+    const wantsRuby = iv.kind === "gloss" || iv.kind === "both";
+    if (!wantsRuby) {
+      const span = document.createElement("span");
+      span.className = "engloss-verb";
+      span.appendChild(document.createTextNode(iv.text));
+      return span;
     }
-    return span;
+    const ruby = document.createElement("ruby");
+    ruby.className = iv.kind === "both"
+      ? "engloss-word engloss-verb"
+      : "engloss-word";
+    ruby.appendChild(document.createTextNode(iv.text));
+    if (iv.ja) {
+      const rt = document.createElement("rt");
+      rt.className = "engloss-ja";
+      rt.appendChild(document.createTextNode(iv.ja));
+      ruby.appendChild(rt);
+    }
+    return ruby;
   }
 
   // Build a DocumentFragment from an English string + gloss/verb lists.
