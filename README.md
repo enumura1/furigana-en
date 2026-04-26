@@ -1,14 +1,23 @@
 # EN Gloss Reader
 
 A Chrome extension that translates Japanese web pages into English using
-Chrome's built-in Gemini Nano (Prompt API), and appends a short Japanese
-gloss in parentheses next to every CEFR-B2-or-above word in the
-translation. Aimed at Japanese learners of English who want to keep
-reading the Japanese articles they already enjoy, but in English, without
-getting stuck on unfamiliar vocabulary.
+Chrome's built-in Gemini Nano (Prompt API). It then annotates the
+translation in two ways:
+
+- **Japanese gloss as ruby** under every CEFR-B2-or-above English word
+  (rendered with the native `<ruby>` element + `ruby-position: under`),
+  so the meaning sits below the word without breaking reading flow.
+- **Pink tint on main and auxiliary verbs**, so sentence structure is
+  easier to scan.
+
+Aimed at Japanese learners of English who want to keep reading the
+Japanese articles they already enjoy, but in English, without getting
+stuck on unfamiliar vocabulary.
 
 > Example: "アルゴリズムは顕著な収束性を示す" is replaced in place with
-> "The algorithm exhibits(示す) remarkable(注目に値する) convergence(収束) properties."
+> "The algorithm **exhibits** remarkable convergence properties." —
+> with the verb "exhibits" tinted pink and Japanese glosses (示す, 顕著な,
+> 収束) sitting underneath the corresponding English words.
 
 All processing happens on-device through Chrome's bundled Gemini Nano.
 **No data is sent to any external server.** See [PRIVACY.md](./PRIVACY.md)
@@ -44,11 +53,16 @@ for details.
 1. Open a Japanese page you want to translate.
 2. Click the extension icon to open its popup.
 3. Press **このページで実行** ("Run on this page") — the body
-   paragraphs will be replaced with their English translations, with
-   Japanese glosses appended to difficult words.
-4. Press **元に戻す** ("Restore") to revert to the original text.
-5. Toggle **自動実行** ("Auto-run") on to translate every page as it
-   loads. This is heavy work — leave it off unless you want it.
+   paragraphs are replaced with their English translations, with the
+   Japanese gloss for each difficult word appearing as ruby
+   underneath, and main/auxiliary verbs tinted pink.
+4. Press **元に戻す** ("Restore") to revert to the original Japanese.
+5. Toggle **このサイトで自動実行** ("Auto-run on this site") on to make
+   the extension translate every page on the current host (e.g.
+   `ja.wikipedia.org`) as it loads. The toggle is per-site — turning it
+   on for Wikipedia does not affect Google search results, GitHub, or
+   any other domain. The popup shows the active host and the current
+   on/off state so the setting is unambiguous.
 
 The first run may trigger a model download. Progress is reported in the
 top-right banner.

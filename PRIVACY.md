@@ -9,10 +9,12 @@ connection of its own.
 
 The only value the extension stores via `chrome.storage.sync` is:
 
-- `autoRun` (boolean): whether translation should run automatically
-  whenever a page finishes loading.
+- `siteAutoRun` (object: `{ [host]: boolean }`): a per-host map of
+  which sites the user has opted into automatic translation on. Only
+  hosts the user has explicitly toggled on are present in the map.
+  Other hosts are unaffected.
 
-Because it lives in `chrome.storage.sync`, this flag follows the user
+Because it lives in `chrome.storage.sync`, this map follows the user
 across devices through Chrome's standard sync feature. The extension's
 author cannot read it.
 
@@ -33,10 +35,15 @@ author cannot read it.
 
 - Translations are written directly into the active tab's DOM and live
   nowhere else.
-- They disappear when you navigate away, close the tab, or restart the
-  browser.
+- For performance, parsed translation results are also held in an
+  in-memory cache keyed by the original Japanese paragraph. This cache
+  exists only as a JavaScript `Map` inside the content script, lives
+  only while the tab is open, and is cleared on the `pagehide` event.
+- All in-memory state — the live DOM, the cache, and the LanguageModel
+  session itself — disappears when you navigate away, close the tab,
+  or restart the browser.
 - Nothing is persisted to `localStorage`, `sessionStorage`, IndexedDB,
-  or any cache.
+  HTTP caches, or any other long-lived storage.
 
 ## Third parties
 
@@ -70,3 +77,5 @@ Questions about this policy can be filed in the project's
 ## Changelog
 
 - 2026-04-26: Initial version.
+- 2026-04-26: Storage key updated from `autoRun` (global) to
+  `siteAutoRun` (per-host map). In-memory cache disclosure added.
