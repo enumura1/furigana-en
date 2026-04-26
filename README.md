@@ -84,4 +84,4 @@ statement.
 
 ## License
 
-MIT
+[MIT](./LICENSE)
