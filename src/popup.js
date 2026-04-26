@@ -7,6 +7,7 @@
   const runBtn = document.getElementById("run");
   const restoreBtn = document.getElementById("restore");
   const autoRunBox = document.getElementById("auto-run");
+  const autoRunHostEl = document.getElementById("auto-run-host");
 
   // Show the inline error banner at the top of the popup.
   function showError(message) {
@@ -75,18 +76,51 @@
     }
   }
 
-  // Initialize: hydrate the auto-run toggle from storage and wire handlers.
-  async function init() {
+  // Pull the host from a tab URL; null on unsupported / unparseable URLs.
+  function hostFromTab(tab) {
+    if (!tab || !tab.url || isUnsupportedUrl(tab.url)) return null;
     try {
-      const data = await chrome.storage.sync.get({ autoRun: false });
-      autoRunBox.checked = !!data.autoRun;
-    } catch (e) {
-      console.error("[EN Gloss popup] storage read failed", e);
+      return new URL(tab.url).host || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Initialize: resolve the active tab's host, hydrate the per-host auto-run
+  // toggle, and wire handlers.
+  async function init() {
+    let tab = null;
+    try {
+      tab = await getActiveTab();
+    } catch (_) { /* surfaced when buttons are pressed */ }
+    const host = hostFromTab(tab);
+
+    autoRunHostEl.textContent = host || "(このページでは設定できません)";
+
+    if (!host) {
+      autoRunBox.checked = false;
+      autoRunBox.disabled = true;
+    } else {
+      try {
+        const data = await chrome.storage.sync.get({ siteAutoRun: {} });
+        const map = data.siteAutoRun || {};
+        autoRunBox.checked = !!map[host];
+      } catch (e) {
+        console.error("[EN Gloss popup] storage read failed", e);
+      }
     }
 
     autoRunBox.addEventListener("change", async () => {
+      if (!host) return;
       try {
-        await chrome.storage.sync.set({ autoRun: autoRunBox.checked });
+        const data = await chrome.storage.sync.get({ siteAutoRun: {} });
+        const map = (data && data.siteAutoRun) || {};
+        if (autoRunBox.checked) {
+          map[host] = true;
+        } else {
+          delete map[host];
+        }
+        await chrome.storage.sync.set({ siteAutoRun: map });
       } catch (e) {
         console.error("[EN Gloss popup] storage write failed", e);
       }

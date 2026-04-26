@@ -625,13 +625,17 @@ Rules:
 
   // ---------- Auto-run ----------
 
-  // If the user has enabled auto-run in popup settings, kick off a translation
-  // pass once the script is ready. Stays opt-in (default false).
+  // Auto-run is now per-host. Only fires when the popup has explicitly opted
+  // in for the current location.host, so unrelated sites (Google search,
+  // GitHub, social timelines, etc.) stay untouched.
   async function maybeAutoRun() {
     try {
-      const data = await chrome.storage.sync.get({ autoRun: false });
-      if (!data.autoRun) return;
-      console.log("[EN Gloss] auto-run enabled, starting");
+      const host = location.host;
+      if (!host) return;
+      const data = await chrome.storage.sync.get({ siteAutoRun: {} });
+      const map = (data && data.siteAutoRun) || {};
+      if (!map[host]) return;
+      console.log("[EN Gloss] auto-run enabled for host:", host);
       runAll();
     } catch (e) {
       console.error("[EN Gloss] auto-run check failed", e);
