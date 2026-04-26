@@ -8,6 +8,20 @@
   const restoreBtn = document.getElementById("restore");
   const autoRunBox = document.getElementById("auto-run");
   const autoRunHostEl = document.getElementById("auto-run-host");
+  const autoRunStatusEl = document.getElementById("auto-run-status");
+
+  // Render the on/off state line so the user gets immediate confirmation
+  // that the toggle was saved.
+  function renderStatus(enabled, supported) {
+    if (!autoRunStatusEl) return;
+    if (!supported) {
+      autoRunStatusEl.textContent = "—";
+      autoRunStatusEl.className = "status-off";
+      return;
+    }
+    autoRunStatusEl.textContent = enabled ? "有効" : "無効";
+    autoRunStatusEl.className = enabled ? "status-on" : "status-off";
+  }
 
   // Show the inline error banner at the top of the popup.
   function showError(message) {
@@ -100,18 +114,24 @@
     if (!host) {
       autoRunBox.checked = false;
       autoRunBox.disabled = true;
+      renderStatus(false, false);
     } else {
       try {
         const data = await chrome.storage.sync.get({ siteAutoRun: {} });
         const map = data.siteAutoRun || {};
         autoRunBox.checked = !!map[host];
+        renderStatus(autoRunBox.checked, true);
       } catch (e) {
         console.error("[EN Gloss popup] storage read failed", e);
+        renderStatus(false, true);
       }
     }
 
     autoRunBox.addEventListener("change", async () => {
       if (!host) return;
+      // Optimistically reflect the new state — storage.sync writes are fast
+      // but we don't want the user to wonder whether the click registered.
+      renderStatus(autoRunBox.checked, true);
       try {
         const data = await chrome.storage.sync.get({ siteAutoRun: {} });
         const map = (data && data.siteAutoRun) || {};
