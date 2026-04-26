@@ -41,6 +41,11 @@ Gloss examples (DO):
 Gloss anti-examples (DO NOT gloss — these are entrance-exam basics):
 - "purpose", "direct", "however", "important", "use", "make", "study", "model", "data", "system", "task", "result", "research", "method", "approach", "common", "simple", "various"
 
+Verb examples (DO include in "verbs"):
+- "is", "are", "exhibits", "studies", "trains", "extracts", "have advanced", "has been used", "can run", "must consider"
+- Multi-word verb phrases: keep them together as one entry ("has been used", not ["has", "been", "used"]).
+- Always populate "verbs" — every paragraph has at least one main verb. An empty "verbs" array is almost always wrong.
+
 Subject rules (read carefully):
 - Return the FULL subject noun phrase, not just the head noun or pronoun. Include determiners ("the", "a"), adjectives ("new", "large"), prepositional modifiers ("of the model"), and relative clauses ("that learn from data"). Bare-pronoun subjects ("It", "She", "They") are correct only when the original sentence really does have just a pronoun there.
 - DO NOT include direct objects, indirect objects, or noun phrases inside prepositional phrases. In "Researchers study models", the subject is "Researchers" — NOT "models".
@@ -375,10 +380,10 @@ Rules:
       "ruby.engloss-word { ruby-position: under; ruby-align: center; }",
       "ruby.engloss-word > rt.engloss-ja { color: #0a7; font-size: 0.62em; font-weight: normal; }",
       ".engloss-verb { color: #ec4899; font-weight: 600; }",
-      // Soft sky-blue highlight tape under the subject. Distinct from the pink
-      // verb tint and the green ruby gloss color, low enough alpha to keep
-      // body text comfortably readable.
-      ".engloss-subject { background-color: rgba(56, 189, 248, 0.18); border-radius: 2px; padding: 0 2px; }"
+      // Lavender highlight tape under the subject. Distinct from the pink verb
+      // tint and the green ruby gloss color (no muddy yellow/green overlap),
+      // strong enough alpha to read as a deliberate highlight.
+      ".engloss-subject { background-color: rgba(196, 181, 253, 0.45); border-radius: 2px; padding: 0 2px; }"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
