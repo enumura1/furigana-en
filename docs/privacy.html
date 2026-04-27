@@ -6,170 +6,148 @@
     <title>プライバシーポリシー — EN Gloss Reader</title>
     <meta
       name="description"
-      content="EN Gloss Reader のプライバシーポリシー。翻訳は Chrome 内蔵 Gemini Nano が端末内で実行し、外部サーバへの送信・解析・保存は一切行いません。"
+      content="EN Gloss Reader のプライバシーポリシー。すべての翻訳は端末内で実行され、ページ本文や翻訳結果は外部に送信されません。"
     />
     <link rel="icon" type="image/png" sizes="48x48" href="./assets/icon-48.png" />
     <link rel="icon" type="image/png" sizes="128x128" href="./assets/icon-128.png" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
-    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <div class="shell site-header__inner">
-        <a class="brand" href="./index.html" aria-label="EN Gloss Reader トップへ">
-          <img src="./assets/icon-48.png" alt="" width="32" height="32" />
+      <div class="container site-header__inner">
+        <a class="brand" href="./index.html">
+          <img src="./assets/icon-48.png" alt="" />
           <span>EN Gloss Reader</span>
         </a>
-        <span class="site-header__meta" aria-hidden="true">プライバシー</span>
+        <nav class="site-header__nav" aria-label="サイト内ナビゲーション">
+          <a href="./index.html">トップ</a>
+          <a
+            href="https://github.com/enumura1/furigana-en"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+        </nav>
       </div>
     </header>
 
-    <main class="shell" style="padding-top: 56px; padding-bottom: 24px;">
-      <article class="prose">
+    <main>
+      <article class="container prose">
         <h1>プライバシーポリシー</h1>
-        <span class="updated">最終更新 · 2026-04-26</span>
+        <p class="prose__updated">最終更新: 2026-04-26</p>
 
-        <div class="ja-summary" lang="ja">
-          <h2>要点 (3 行)</h2>
-          <ul>
-            <li>翻訳はすべて Chrome 内蔵の Gemini Nano が <strong>端末内</strong> で実行します。</li>
-            <li>ページ本文と翻訳結果は <strong>外部サーバへ一切送信されません</strong>。</li>
-            <li><code>chrome.storage.sync</code> に保存するのは「自動翻訳をオンにしたサイトの一覧」のみです。</li>
-          </ul>
-        </div>
-
-        <p lang="en">
-          EN Gloss Reader (the "extension") is designed to keep all user data on
-          the device. Every translation is performed by Chrome's built-in Gemini
-          Nano (Prompt API) running locally; the extension never opens a network
-          connection of its own.
+        <p>
+          EN Gloss Reader（以下「本拡張」）は、ユーザーのデータを端末の外に出さない方針で設計されています。
+          すべての翻訳は Chrome 内蔵の Gemini Nano（Prompt API）が端末内でローカルに実行し、
+          本拡張自身が外部にネットワーク接続を開くことはありません。
         </p>
 
-        <h2 lang="en">Data collected</h2>
-        <p lang="en">The only value the extension stores via <code>chrome.storage.sync</code> is:</p>
-        <ul lang="en">
+        <h2>収集するデータ</h2>
+        <p>
+          本拡張が <code>chrome.storage.sync</code> に保存するのは、次の値のみです。
+        </p>
+        <ul>
           <li>
-            <code>siteAutoRun</code> (object: <code>{ [host]: boolean }</code>):
-            a per-host map of which sites the user has opted into automatic
-            translation on. Only hosts the user has explicitly toggled on are
-            present in the map. Other hosts are unaffected.
+            <code>siteAutoRun</code>（<code>{ [host]: boolean }</code> 形式のオブジェクト）:
+            ユーザーが自動翻訳を有効にしたホスト名のマップ。明示的に ON にしたホストのみが含まれます。
           </li>
         </ul>
-        <p lang="en">
-          Because it lives in <code>chrome.storage.sync</code>, this map follows
-          the user across devices through Chrome's standard sync feature. The
-          extension's author cannot read it.
+        <p>
+          この値は <code>chrome.storage.sync</code> に保存されるため、Chrome の同期機能を通じて
+          ユーザーの端末間で共有されます。本拡張の作者がこの値を読むことはできません。
         </p>
 
-        <h2 lang="en">Page contents</h2>
-        <ul lang="en">
+        <h2>ページ本文の扱い</h2>
+        <ul>
           <li>
-            When you click <strong>"Run on this page"</strong> (or auto-run is
-            enabled), the extension reads the body paragraphs of the active tab
-            — the <code>&lt;p&gt;</code>, <code>&lt;li&gt;</code>,
-            <code>&lt;blockquote&gt;</code>, <code>&lt;dd&gt;</code>,
-            <code>&lt;dt&gt;</code>, and <code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code>
-            elements — into browser memory.
+            「このページで実行」を押した時、または自動実行が有効な時、アクティブなタブの本文段落
+            （<code>&lt;p&gt;</code>、<code>&lt;li&gt;</code>、<code>&lt;blockquote&gt;</code>、<code>&lt;dd&gt;</code>、<code>&lt;dt&gt;</code>、<code>&lt;h1&gt;</code>〜<code>&lt;h6&gt;</code>）
+            をブラウザのメモリに読み込みます。
           </li>
           <li>
-            That text is handed to <strong>Chrome's built-in Gemini Nano running
-            locally</strong>, which produces the English translation and Japanese
-            glosses.
+            読み込んだテキストは <strong>端末内で動作する Chrome 内蔵 Gemini Nano</strong> に渡され、
+            英訳と日本語訳の付与が生成されます。
           </li>
           <li>
-            <strong>Nothing is sent to any external server.</strong> The source
-            code contains no <code>fetch</code>, <code>XMLHttpRequest</code>,
-            <code>WebSocket</code>, <code>EventSource</code>, or
-            <code>navigator.sendBeacon</code> calls.
+            <strong>外部サーバには何も送信されません。</strong>
+            ソースコードには <code>fetch</code>、<code>XMLHttpRequest</code>、<code>WebSocket</code>、
+            <code>EventSource</code>、<code>navigator.sendBeacon</code> のいずれの呼び出しもありません。
           </li>
         </ul>
 
-        <h2 lang="en">Translation results</h2>
-        <ul lang="en">
+        <h2>翻訳結果の扱い</h2>
+        <ul>
           <li>
-            Translations are written directly into the active tab's DOM and live
-            nowhere else.
+            翻訳結果はアクティブなタブの DOM に直接書き込まれ、それ以外には保存されません。
           </li>
           <li>
-            For performance, parsed translation results are also held in an
-            in-memory cache keyed by the original Japanese paragraph. This cache
-            exists only as a JavaScript <code>Map</code> inside the content
-            script, lives only while the tab is open, and is cleared on the
-            <code>pagehide</code> event.
+            パフォーマンスのため、解析済みの翻訳結果はコンテンツスクリプト内の
+            JavaScript の <code>Map</code> にキャッシュされます。このキャッシュはタブが開いている間のみ存在し、
+            <code>pagehide</code> イベントでクリアされます。
           </li>
           <li>
-            All in-memory state — the live DOM, the cache, and the
-            LanguageModel session itself — disappears when you navigate away,
-            close the tab, or restart the browser.
+            DOM・キャッシュ・LanguageModel セッションは、ページ遷移、タブを閉じる、
+            ブラウザの再起動のいずれかで失われます。
           </li>
           <li>
-            Nothing is persisted to <code>localStorage</code>,
-            <code>sessionStorage</code>, IndexedDB, HTTP caches, or any other
-            long-lived storage.
+            <code>localStorage</code>、<code>sessionStorage</code>、IndexedDB、HTTP キャッシュ、
+            その他の永続ストレージには一切保存されません。
           </li>
         </ul>
 
-        <h2 lang="en">Third parties</h2>
-        <p lang="en">None. The extension does not share data with any third party.</p>
+        <h2>第三者提供</h2>
+        <p>ありません。本拡張はいかなる第三者ともデータを共有しません。</p>
 
-        <h2 lang="en">Analytics and tracking</h2>
-        <p lang="en">
-          None. The extension contains no analytics SDK, telemetry, or tracking
-          pixel.
+        <h2>分析・トラッキング</h2>
+        <p>
+          ありません。本拡張には分析 SDK、テレメトリ、トラッキングピクセルのいずれも含まれません。
         </p>
 
-        <h2 lang="en">Cookies and credentials</h2>
-        <p lang="en">
-          The extension does not read <code>document.cookie</code>, and it does
-          not read the values of form fields (<code>&lt;input&gt;</code>,
-          <code>&lt;textarea&gt;</code>, etc.). It does not request the
-          <code>tabs</code>, <code>cookies</code>, <code>history</code>,
-          <code>webRequest</code>, or <code>identity</code> permissions.
+        <h2>Cookie・認証情報</h2>
+        <p>
+          本拡張は <code>document.cookie</code> を読み取りません。フォームフィールド
+          （<code>&lt;input&gt;</code>、<code>&lt;textarea&gt;</code> など）の値も読み取りません。
+          <code>tabs</code>、<code>cookies</code>、<code>history</code>、<code>webRequest</code>、
+          <code>identity</code> の各権限は要求しません。
         </p>
-        <p lang="en">The permissions it does request are:</p>
-        <ul lang="en">
-          <li>
-            <code>storage</code> — to persist the user setting described above.
-          </li>
-          <li>
-            <code>activeTab</code> — to act on the tab the user explicitly
-            invoked the popup on.
-          </li>
-          <li>
-            <code>scripting</code> — to re-inject the content script if the
-            active tab pre-existed the extension's installation.
-          </li>
+        <p>本拡張が要求する権限は次のとおりです。</p>
+        <ul>
+          <li><code>storage</code> — 上記のユーザー設定の保存に使用。</li>
+          <li><code>activeTab</code> — ユーザーがポップアップを開いたタブに対してのみ動作するため。</li>
+          <li><code>scripting</code> — 拡張インストール前から開かれていたタブにコンテンツスクリプトを再注入するため。</li>
         </ul>
 
-        <h2 lang="en">Contact</h2>
-        <p lang="en">
-          Questions about this policy can be filed in the project's
+        <h2>お問い合わせ</h2>
+        <p>
+          本ポリシーに関する質問は、プロジェクトの
           <a
             href="https://github.com/enumura1/furigana-en/issues"
             target="_blank"
             rel="noopener noreferrer"
             >GitHub Issues</a
-          >.
+          >
+          までお願いします。
         </p>
-
-        <h2 lang="en">Changelog</h2>
-        <p lang="en">2026-04-26 · Initial version.</p>
       </article>
     </main>
 
     <footer class="site-footer">
-      <div class="shell site-footer__inner">
+      <div class="container site-footer__inner">
         <span>© 2026 enumura1</span>
         <span class="site-footer__links">
-          <a href="https://github.com/enumura1/furigana-en" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="./index.html">トップ</a>
-          <a href="https://github.com/enumura1/furigana-en/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+          <a
+            href="https://github.com/enumura1/furigana-en/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            >MIT License</a
+          >
+          <a
+            href="https://github.com/enumura1/furigana-en"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
         </span>
       </div>
     </footer>

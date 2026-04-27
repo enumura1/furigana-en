@@ -6,48 +6,43 @@
     <title>EN Gloss Reader — 日本語ページを英語で読む Chrome 拡張</title>
     <meta
       name="description"
-      content="日本語のページを英語に翻訳し、むずかしい単語の下に小さく日本語訳をつける Chrome 拡張。すべて端末内で処理、外部送信ゼロ。"
+      content="日本語のページを英語に翻訳し、難しい単語の下に小さく日本語訳を添える Chrome 拡張。すべて端末内で処理し、外部送信は行いません。"
     />
     <meta property="og:title" content="EN Gloss Reader" />
     <meta
       property="og:description"
-      content="日本語のページを英語に翻訳し、むずかしい単語の下に小さく日本語訳をつける Chrome 拡張。"
+      content="日本語のページを英語に翻訳し、難しい単語の下に小さく日本語訳を添える Chrome 拡張。"
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="./assets/icon-128.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="./assets/icon-48.png" />
     <link rel="icon" type="image/png" sizes="128x128" href="./assets/icon-128.png" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
-    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <div class="shell site-header__inner">
-        <a class="brand" href="./index.html" aria-label="EN Gloss Reader">
-          <img src="./assets/icon-48.png" alt="" width="32" height="32" />
+      <div class="container site-header__inner">
+        <a class="brand" href="./index.html">
+          <img src="./assets/icon-48.png" alt="" />
           <span>EN Gloss Reader</span>
         </a>
-        <span class="site-header__meta" aria-hidden="true">v0.1.0</span>
+        <nav class="site-header__nav" aria-label="サイト内ナビゲーション">
+          <a href="./privacy.html">プライバシー</a>
+          <a
+            href="https://github.com/enumura1/furigana-en"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+        </nav>
       </div>
     </header>
 
     <main>
-      <!-- Hero -->
-      <section class="hero shell" aria-labelledby="hero-title">
-        <h1 id="hero-title">
-          日本語のページを英語で読む。<br />
-          むずかしい単語の下に、小さく日本語訳。
-        </h1>
-        <p>
-          Chrome 内蔵の Gemini Nano が、開いている日本語ページを段落ごとに
-          英語へ翻訳します。英検準1級・大学入試レベルを超えるような単語にだけ、
-          小さな日本語訳を添えるので、知らない単語で読みが止まりません。
+      <section class="container hero">
+        <h1>日本語のページを、<br />英語で読む。</h1>
+        <p class="hero__lead">
+          開いている日本語ページを、Chrome 内蔵の Gemini Nano が段落ごとに英語へ翻訳します。
+          難しい単語の下にだけ小さく日本語訳が添えられるので、知らない単語で読みが止まりません。
           翻訳はすべて端末内で行われ、ページ本文も翻訳結果も外部に送られません。
         </p>
         <div class="hero__cta">
@@ -56,140 +51,135 @@
             href="https://github.com/enumura1/furigana-en"
             target="_blank"
             rel="noopener noreferrer"
-            >GitHub で見る →</a
+            >GitHub で見る</a
           >
           <a class="btn btn--ghost" href="#install">使い方を見る</a>
         </div>
       </section>
 
-      <!-- Demo -->
-      <section class="shell" aria-labelledby="demo-title">
+      <section class="container section" aria-labelledby="demo-title">
+        <span class="section__eyebrow">Demo</span>
         <h2 id="demo-title">こうなります</h2>
-        <p class="section-lede">
-          日本語のページに拡張を効かせると、本文がこのように置き換わります。
-          動詞はピンクに、知らない可能性のある単語の下には小さく日本語訳が出ます。
+        <p class="section__intro">
+          日本語の段落が、英語の文章に置き換わります。動詞はピンクで色付けされ、難しい単語の下にだけ小さく日本語訳が表示されます。
         </p>
 
         <div class="demo">
-          <div class="demo__pair">
-            <div class="demo__panel">
-              <span class="demo__label">日本語のページ</span>
-              <p class="demo__before">
-                深層学習は近年、画像認識や自然言語処理の分野で、めざましい発展を遂げてきた。
-              </p>
-            </div>
-
-            <div class="demo__arrow" aria-hidden="true">↓</div>
-
-            <div class="demo__panel">
-              <span class="demo__label">拡張をオンにすると</span>
-              <p class="demo__after">
-                Deep learning has <ruby class="engloss-word engloss-verb">achieved<rt class="engloss-ja">達成した</rt></ruby> <ruby class="engloss-word">remarkable<rt class="engloss-ja">めざましい</rt></ruby> progress in image recognition and natural language processing in recent years.
-              </p>
-            </div>
+          <div class="demo__panel">
+            <span class="demo__label">変換前</span>
+            <p class="demo__text">
+              深層学習は近年、画像認識や自然言語処理の分野で、めざましい発展を遂げてきた。
+            </p>
           </div>
 
-          <div class="demo__legend" role="note" aria-label="表示の凡例">
-            <span class="demo__legend-item">
-              <span class="demo__legend-dot demo__legend-dot--verb" aria-hidden="true"></span>
-              ピンクの単語 = 動詞
-            </span>
-            <span class="demo__legend-item">
-              <span class="demo__legend-dot demo__legend-dot--gloss" aria-hidden="true"></span>
-              単語の下の小さな字 = 日本語訳
-            </span>
+          <div class="demo__arrow" aria-hidden="true">↓</div>
+
+          <div class="demo__panel">
+            <span class="demo__label">変換後</span>
+            <p class="demo__text">
+              Deep learning <ruby class="engloss-word engloss-verb">has achieved<rt class="engloss-ja">遂げてきた</rt></ruby> <ruby class="engloss-word">remarkable<rt class="engloss-ja">めざましい</rt></ruby> progress in image recognition and natural language processing in recent years.
+            </p>
           </div>
+        </div>
+
+        <div class="demo__legend" role="note" aria-label="表示の凡例">
+          <span class="demo__legend-item">
+            <span class="demo__legend-dot demo__legend-dot--verb" aria-hidden="true"></span>
+            動詞
+          </span>
+          <span class="demo__legend-item">
+            <span class="demo__legend-dot demo__legend-dot--gloss" aria-hidden="true"></span>
+            日本語訳
+          </span>
         </div>
       </section>
 
-      <!-- Features -->
-      <section class="shell" aria-labelledby="features-title">
-        <h2 id="features-title">3 つの特徴</h2>
+      <section class="container section" aria-labelledby="features-title">
+        <span class="section__eyebrow">Features</span>
+        <h2 id="features-title">特徴</h2>
+
         <div class="features">
           <div class="feature">
-            <h3>すべて端末内で処理</h3>
+            <h3>端末内ですべて処理</h3>
             <p>
-              翻訳は Chrome 内蔵の Gemini Nano が端末のなかだけで動かします。
-              ページ本文も翻訳結果も外部サーバには送信されません
-              （ソースコードに <code>fetch</code> も <code>XMLHttpRequest</code> も書かれていません）。
+              翻訳は Chrome 内蔵の Gemini Nano が端末内で実行します。ページ本文も翻訳結果も外部サーバには送信しません。
             </p>
           </div>
           <div class="feature">
-            <h3>むずかしい単語にだけ日本語訳</h3>
+            <h3>難しい単語にだけ訳</h3>
             <p>
-              基本語にはなにも添えません。英検準1級・大学入試レベルを超えるような単語の下にだけ、
-              小さな日本語訳がつきます。知っている単語で読みが止まりません。
+              基本語には何も付けません。英検準1級・大学入試レベルを超える単語にだけ、小さな日本語訳が添えられます。
             </p>
           </div>
           <div class="feature">
-            <h3>サイト単位で自動翻訳の ON/OFF</h3>
+            <h3>サイト単位で自動実行</h3>
             <p>
-              「Wikipedia は自動で翻訳、Google 検索結果は触らない」のような設定が、
-              ホストごとに独立してできます。意図しないページが勝手に書き換わることはありません。
+              ホストごとに自動翻訳を ON/OFF できます。Wikipedia は自動で、検索結果はそのまま、といった切り分けが可能です。
             </p>
           </div>
         </div>
       </section>
 
-      <!-- Requirements -->
-      <section class="shell" aria-labelledby="requirements-title">
-        <h2 id="requirements-title">動作要件</h2>
-        <div class="specs">
-          <dl>
-            <dt>ブラウザ</dt>
-            <dd>Google Chrome 140 以降（デスクトップ版）</dd>
-
-            <dt>OS</dt>
-            <dd>macOS 13+ / Windows 10+ / Linux / ChromeOS</dd>
-
-            <dt>ストレージ</dt>
-            <dd>22 GB 以上の空き容量（Gemini Nano モデル本体）</dd>
-
-            <dt>メモリ / GPU</dt>
-            <dd>VRAM 4 GB 以上の GPU、または RAM 16 GB 以上 + 4 コア以上の CPU</dd>
-
-            <dt>ネットワーク</dt>
-            <dd>初回モデルダウンロード時のみ必要</dd>
-          </dl>
-        </div>
-      </section>
-
-      <!-- Install -->
-      <section class="shell" id="install" aria-labelledby="install-title">
+      <section class="container section" id="install" aria-labelledby="install-title">
+        <span class="section__eyebrow">Install</span>
         <h2 id="install-title">使い方</h2>
-        <p class="section-lede">
-          現在は Chrome Web Store 公開前のため、開発者モードで読み込みます。
+        <p class="section__intro">
+          現在は Chrome ウェブストア未公開のため、開発者モードで読み込みます。
         </p>
-
         <ol class="steps">
           <li>
-            <strong>リポジトリをクローン:</strong><br />
+            リポジトリをクローン:
             <code>git clone https://github.com/enumura1/furigana-en.git</code>
           </li>
           <li>
-            <span class="kbd">chrome://extensions/</span> を開いて、
-            右上の<strong>「デベロッパーモード」</strong>を ON。
+            <code>chrome://extensions/</code> を開き、右上の「デベロッパーモード」を ON にします。
           </li>
           <li>
-            <strong>「パッケージ化されていない拡張機能を読み込む」</strong>を押して、
-            クローンしたフォルダ（<code>manifest.json</code> がある階層）を選択。
+            「パッケージ化されていない拡張機能を読み込む」を押し、クローンしたフォルダ（<code>manifest.json</code> がある階層）を選択します。
           </li>
           <li>
-            ツールバーにアイコンをピン留めし、日本語のページを開いて
-            <strong>「このページで実行」</strong>を押すと翻訳が始まります。
-            初回はモデルのダウンロードが走ります（数分〜十数分）。
+            日本語ページを開き、ツールバーのアイコンから「このページで実行」を押します。初回はモデルのダウンロードが入ります。
           </li>
         </ol>
+      </section>
+
+      <section class="container section" aria-labelledby="reqs-title">
+        <span class="section__eyebrow">Requirements</span>
+        <h2 id="reqs-title">動作要件</h2>
+
+        <dl class="specs">
+          <dt>ブラウザ</dt>
+          <dd>Google Chrome 140 以降（デスクトップ版）</dd>
+
+          <dt>ストレージ</dt>
+          <dd>22 GB 以上の空き容量（モデル本体）</dd>
+
+          <dt>GPU / メモリ</dt>
+          <dd>VRAM 4 GB 以上の GPU を推奨</dd>
+
+          <dt>ネットワーク</dt>
+          <dd>初回のモデルダウンロード時のみ必要</dd>
+        </dl>
       </section>
     </main>
 
     <footer class="site-footer">
-      <div class="shell site-footer__inner">
+      <div class="container site-footer__inner">
         <span>© 2026 enumura1</span>
         <span class="site-footer__links">
-          <a href="https://github.com/enumura1/furigana-en" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="./privacy.html">プライバシーポリシー</a>
-          <a href="https://github.com/enumura1/furigana-en/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+          <a href="./privacy.html">プライバシー</a>
+          <a
+            href="https://github.com/enumura1/furigana-en/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            >MIT License</a
+          >
+          <a
+            href="https://github.com/enumura1/furigana-en"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
         </span>
       </div>
     </footer>
