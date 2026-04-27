@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
   "name": "EN Gloss Reader",
+  "short_name": "EN Gloss",
   "version": "0.1.0",
-  "description": "Translate Japanese pages into English and gloss CEFR-B2+ words with Japanese in parentheses. Runs entirely on Chrome's built-in Gemini Nano — zero external traffic.",
+  "description": "Translates Japanese pages to English and glosses CEFR B2+ words. Runs on Chrome's built-in Gemini Nano — zero external traffic.",
+  "author": "enumura1",
+  "homepage_url": "https://github.com/enumura1/furigana-en",
   "minimum_chrome_version": "140",
   "permissions": ["storage", "activeTab", "scripting"],
   "action": {
