@@ -20,8 +20,9 @@ stuck on unfamiliar vocabulary.
 > 収束) sitting underneath the corresponding English words.
 
 All processing happens on-device through Chrome's bundled Gemini Nano.
-**No data is sent to any external server.** See [PRIVACY.md](./PRIVACY.md)
-for details.
+**No data is sent to any external server.** See the
+[privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
+(or [PRIVACY.md](./PRIVACY.md) in this repo) for details.
 
 ## Requirements
 
@@ -93,8 +94,9 @@ construction.
 ## Privacy
 
 Page bodies and translation results are never transmitted off-device,
-and never persisted. See [PRIVACY.md](./PRIVACY.md) for the full
-statement.
+and never persisted. See the
+[hosted privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
+(or [PRIVACY.md](./PRIVACY.md) in this repo) for the full statement.
 
 ## License
 
