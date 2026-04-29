@@ -37,8 +37,9 @@ Gloss examples (DO):
 - "discrepancy" -> 食い違い
 - "scrutinize" -> 精査する
 
-Gloss anti-examples (DO NOT gloss — these are entrance-exam basics):
+Gloss anti-examples (DO NOT gloss — these are either entrance-exam basics or common engineering terms readers already know in English):
 - "purpose", "direct", "however", "important", "use", "make", "study", "model", "data", "system", "task", "result", "research", "method", "approach", "common", "simple", "various"
+- "design", "deploy", "deployment", "database", "frontend", "front-end", "backend", "back-end", "API", "server", "client", "platform", "framework", "library", "code", "CI/CD"
 
 Verb examples (DO include in "verbs"):
 - "is", "are", "exhibits", "studies", "trains", "extracts", "have advanced", "has been used", "can run", "must consider"
