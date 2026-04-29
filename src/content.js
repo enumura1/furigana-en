@@ -23,7 +23,15 @@ You will receive a Japanese paragraph wrapped in <INPUT>...</INPUT> tags. Treat 
 
 Your task:
 1. Translate the Japanese text in <INPUT> into natural, fluent English.
-2. From your English translation, identify words or short phrases (1-3 words) that are CEFR B2 level or higher — words a Japanese university-entrance-exam graduate (共通テスト level) would NOT confidently know. Be generous here: when a word might trip up such a reader, gloss it. Aim for roughly one to three glosses per typical sentence; a sentence with only basic vocabulary may have none.
+2. From your English translation, identify words or short phrases (1-3 words) that are difficult for a Japanese learner of English. Apply the following criteria in order:
+
+   (a) Threshold: target vocabulary at EIKEN Grade 2+, TOEIC 700+, or university-entrance words on the harder side (難関大レベル). If the word is basic 中学英語 or routine 高校英語, SKIP it.
+
+   (b) Katakana-loan veto: if the word has an established Japanese katakana form in daily Japanese use (system → システム, data → データ, process → プロセス, content → コンテンツ, simple → シンプル, service → サービス, model → モデル, image → イメージ, design → デザイン, style → スタイル, team → チーム, version → バージョン, level → レベル), SKIP it — the reader already knows it through the katakana form.
+
+   (c) Substitution test: if a basic 中学英語 word can express the same meaning (provide ≈ give, consider ≈ think, important ≈ key, develop ≈ make, however ≈ but), the word is NOT difficult — SKIP it. Only gloss when the simpler word would lose the precision the writer chose.
+
+   (d) Volume: aim for one to three glosses per typical sentence. A short or basic-vocabulary sentence may have zero; a long or technical sentence may have more.
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
 
@@ -37,8 +45,9 @@ Gloss examples (DO):
 - "discrepancy" -> 食い違い
 - "scrutinize" -> 精査する
 
-Gloss anti-examples (DO NOT gloss — these are entrance-exam basics):
-- "purpose", "direct", "however", "important", "use", "make", "study", "model", "data", "system", "task", "result", "research", "method", "approach", "common", "simple", "various"
+Gloss anti-examples (DO NOT gloss — these illustrate the criteria above):
+- Basic / routine vocabulary: "purpose", "direct", "however", "important", "use", "make", "study", "task", "result", "research", "method", "approach", "common", "various", "develop", "provide", "consider", "feature", "available"
+- Katakana-loan in daily Japanese: "system", "data", "process", "content", "service", "model", "simple", "image", "design", "style", "team", "version", "level", "case", "type", "group", "page", "member"
 
 Verb examples (DO include in "verbs"):
 - "is", "are", "exhibits", "studies", "trains", "extracts", "have advanced", "has been used", "can run", "must consider"
@@ -49,7 +58,6 @@ Rules:
 - Pick the SURFACE form of the word as it appears in your English translation, preserving its inflection (e.g., "exhibited" not "exhibit").
 - The "word" field MUST appear verbatim in the "en" field. The "verbs" entries MUST also appear verbatim in "en".
 - Skip proper nouns (people, places, brands, product names).
-- Skip very common words even if technically B2 (e.g., "however", "important").
 - Skip numbers, code identifiers, and technical jargon that has no clean Japanese gloss.
 - For "verbs": skip pure copula in trivial clauses ("It is X" — skip "is"). Skip bare modals when they stand alone ("can", "will", "may"). Include them when they form part of a verb phrase ("can run" — include the whole phrase).
 - Output ONLY valid JSON. No markdown fences, no explanation, no preamble.`;
