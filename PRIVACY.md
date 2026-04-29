@@ -73,7 +73,3 @@ The permissions it does request are:
 
 Questions about this policy can be filed in the project's
 [GitHub Issues](https://github.com/enumura1/furigana-en/issues).
-
-## Changelog
-
-- 2026-04-26: Initial version.
