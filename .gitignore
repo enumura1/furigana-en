@@ -8,3 +8,6 @@ build/
 
 # Chrome Web Store 出品用テキスト草案 (ローカル作業ファイル、コミット対象外)
 STORE.md
+
+# Chrome Web Store 出品用画像 (スクショ・プロモタイル等、ローカル保管)
+store-assets/
