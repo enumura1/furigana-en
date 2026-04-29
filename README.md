@@ -75,7 +75,7 @@ top-right banner.
   `view-source:`.
 - Works one paragraph at a time. Cross-paragraph references and
   document-wide tone are not preserved.
-- Paragraphs longer than 800 characters are skipped (with a console
+- Paragraphs longer than 600 characters are skipped (with a console
   warning).
 - LLM output may contain mistranslations or missed glosses. Treat the
   result as a study aid, not a reference translation.

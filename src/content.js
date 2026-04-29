@@ -11,7 +11,7 @@
 
   // -- Paragraph filter constants per spec section 5.2 --
   const MIN_LEN = 10;
-  const MAX_LEN = 800;
+  const MAX_LEN = 600;
   const CJK_RATIO = 0.2;
   const CJK_MIN = 5;
   const CJK_REGEX = /[\u3040-\u30ff\u3400-\u9fff]/g;
@@ -132,7 +132,7 @@ Rules:
       const text = (el.textContent || "").trim();
       if (text.length < MIN_LEN) continue;
       if (text.length > MAX_LEN) {
-        console.warn("[EN Gloss] paragraph exceeds 800 chars, skipping:", preview(text));
+        console.warn(`[EN Gloss] paragraph exceeds ${MAX_LEN} chars, skipping:`, preview(text));
         continue;
       }
       if (!passesCjkFilter(text)) continue;
