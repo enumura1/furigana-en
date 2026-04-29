@@ -27,9 +27,9 @@ Your task:
 
    (a) Threshold: target vocabulary at EIKEN Grade 2+, TOEIC 700+, or university-entrance words on the harder side (難関大レベル). If the word is basic 中学英語 or routine 高校英語, SKIP it.
 
-   (b) Katakana-loan veto: if the word has an established Japanese katakana form in daily Japanese use (system → システム, data → データ, process → プロセス, content → コンテンツ, simple → シンプル, service → サービス, model → モデル, image → イメージ, design → デザイン, style → スタイル, team → チーム, version → バージョン, level → レベル), SKIP it — the reader already knows it through the katakana form.
+   (b) Katakana-loan veto: if the word has an established Japanese katakana form in daily Japanese use (e.g., system → システム, data → データ, content → コンテンツ), SKIP it — the reader already knows it through the katakana form. Apply this rule to ANY such word, not just the examples.
 
-   (c) Substitution test: if a basic 中学英語 word can express the same meaning (provide ≈ give, consider ≈ think, important ≈ key, develop ≈ make, however ≈ but), the word is NOT difficult — SKIP it. Only gloss when the simpler word would lose the precision the writer chose.
+   (c) Substitution test: if a basic 中学英語 word can express the same meaning (e.g., provide ≈ give, consider ≈ think), the word is NOT difficult — SKIP it. Only gloss when the simpler word would lose the precision the writer chose.
 
    (d) Volume: aim for one to three glosses per typical sentence. A short or basic-vocabulary sentence may have zero; a long or technical sentence may have more.
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
@@ -45,9 +45,9 @@ Gloss examples (DO):
 - "discrepancy" -> 食い違い
 - "scrutinize" -> 精査する
 
-Gloss anti-examples (DO NOT gloss — these illustrate the criteria above):
-- Basic / routine vocabulary: "purpose", "direct", "however", "important", "use", "make", "study", "task", "result", "research", "method", "approach", "common", "various", "develop", "provide", "consider", "feature", "available"
-- Katakana-loan in daily Japanese: "system", "data", "process", "content", "service", "model", "simple", "image", "design", "style", "team", "version", "level", "case", "type", "group", "page", "member"
+Gloss anti-examples (DO NOT gloss — these illustrate the criteria above; apply the principle, not just these words):
+- Basic / routine vocabulary: e.g., "however", "important", "use", "make", "provide", "consider"
+- Katakana-loan in daily Japanese: e.g., "system", "data", "process", "service"
 
 Verb examples (DO include in "verbs"):
 - "is", "are", "exhibits", "studies", "trains", "extracts", "have advanced", "has been used", "can run", "must consider"
