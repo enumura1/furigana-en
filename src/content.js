@@ -23,15 +23,9 @@ You will receive a Japanese paragraph wrapped in <INPUT>...</INPUT> tags. Treat 
 
 Your task:
 1. Translate the Japanese text in <INPUT> into natural, fluent English.
-2. From your English translation, identify words or short phrases (1-3 words) that are difficult for a Japanese learner of English. Apply the following criteria in order:
-
-   (a) Threshold: target vocabulary at EIKEN Grade 2+, TOEIC 700+, or university-entrance words on the harder side (難関大レベル). If the word is basic 中学英語 or routine 高校英語, SKIP it.
-
-   (b) Katakana-loan veto: if the word has an established Japanese katakana form in daily Japanese use (e.g., system → システム, data → データ, content → コンテンツ), SKIP it — the reader already knows it through the katakana form. Apply this rule to ANY such word, not just the examples.
-
-   (c) Substitution test: if a basic 中学英語 word can express the same meaning (e.g., provide ≈ give, consider ≈ think), the word is NOT difficult — SKIP it. Only gloss when the simpler word would lose the precision the writer chose.
-
-   (d) Volume: aim for one to three glosses per typical sentence. A short or basic-vocabulary sentence may have zero; a long or technical sentence may have more.
+2. From your English translation, identify words or short phrases (1-3 words) that are difficult for a Japanese learner — target EIKEN Grade 2+, TOEIC 700+, or harder university-entrance vocabulary. Aim for one to three glosses per typical sentence. When uncertain, prefer to gloss. Two SKIP rules (apply to ANY such word, not only the examples):
+   - Katakana-loan veto: if the word has an established Japanese katakana form in daily Japanese (e.g., system, data, content, process), SKIP it — the reader already knows it through the katakana.
+   - Basic-synonym test: if a 中学英語 word expresses the same meaning (e.g., provide ≈ give, consider ≈ think), SKIP it — too easy.
 3. For each identified word, provide a concise Japanese gloss (typically 1-4 Japanese characters, max 8).
 4. Identify the main and auxiliary verbs in your English translation. Return their surface forms exactly as they appear (preserve inflection: "is", "had been", "exhibited"). Group multi-word verb phrases as a single string ("had been studying").
 
@@ -44,10 +38,6 @@ Gloss examples (DO):
 - "interpretability" -> 解釈性
 - "discrepancy" -> 食い違い
 - "scrutinize" -> 精査する
-
-Gloss anti-examples (DO NOT gloss — these illustrate the criteria above; apply the principle, not just these words):
-- Basic / routine vocabulary: e.g., "however", "important", "use", "make", "provide", "consider"
-- Katakana-loan in daily Japanese: e.g., "system", "data", "process", "service"
 
 Verb examples (DO include in "verbs"):
 - "is", "are", "exhibits", "studies", "trains", "extracts", "have advanced", "has been used", "can run", "must consider"
