@@ -5,3 +5,6 @@ node_modules/
 .idea/
 dist/
 build/
+
+# Chrome Web Store 出品用テキスト草案 (ローカル作業ファイル、コミット対象外)
+STORE.md
