@@ -20,7 +20,8 @@ stuck on unfamiliar vocabulary.
 > 収束) sitting underneath the corresponding English words.
 
 All processing happens on-device through Chrome's bundled Gemini Nano.
-**No data is sent to any external server.** See the
+**No page bodies or translation results are sent to any external
+server.** See the
 [privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
 (or [PRIVACY.md](./PRIVACY.md) in this repo) for details.
 
@@ -34,6 +35,20 @@ All processing happens on-device through Chrome's bundled Gemini Nano.
     download
 - See Chrome's [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api)
   for the canonical, up-to-date hardware and platform matrix.
+
+The Gemini Nano model is downloaded by Chrome on first use when it is
+not already present. If the Prompt API is unavailable on your Chrome
+build, check Chrome's current built-in AI setup instructions. Depending
+on the Chrome version/channel, you may need to enable related flags such
+as:
+
+- `chrome://flags/#optimization-guide-on-device-model`
+- `chrome://flags/#prompt-api-for-gemini-nano`
+- `chrome://flags/#prompt-api-for-gemini-nano-multimodal-input`
+
+After changing flags, relaunch Chrome. You can inspect model state at
+`chrome://on-device-internals` and confirm API availability in DevTools
+with `await LanguageModel.availability()`.
 
 ## Install (development build)
 
@@ -91,10 +106,19 @@ them. In particular, `xss-attempt.html` exercises both
 prompt-injection resistance and the renderer's textContent-only DOM
 construction.
 
+Before publishing, run:
+
+```bash
+scripts/check-no-sensitive-logs.sh
+```
+
+This fails if production source contains DevTools console logging.
+
 ## Privacy
 
-Page bodies and translation results are never transmitted off-device,
-and never persisted. See the
+Page bodies and translation results are never sent to external servers
+by the extension, and never persisted. Chrome may download Gemini Nano
+on first use. See the
 [hosted privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
 (or [PRIVACY.md](./PRIVACY.md) in this repo) for the full statement.
 

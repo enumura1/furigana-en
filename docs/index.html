@@ -6,7 +6,7 @@
     <title>EN Gloss Reader — 日本語ページを英語で読む Chrome 拡張</title>
     <meta
       name="description"
-      content="日本語のページを英語に翻訳し、難しい単語の下に小さく日本語訳を添える Chrome 拡張。すべて端末内で処理し、外部送信は行いません。"
+      content="日本語のページを英語に翻訳し、難しい単語の下に小さく日本語訳を添える Chrome 拡張。ページ本文や翻訳結果は外部サーバに送信しません。"
     />
     <meta property="og:title" content="EN Gloss Reader" />
     <meta
@@ -43,7 +43,7 @@
         <p class="hero__lead">
           開いている日本語ページを、Chrome 内蔵の Gemini Nano が段落ごとに英語へ翻訳します。
           難しい単語の下にだけ小さく日本語訳が添えられるので、知らない単語で読みが止まりません。
-          翻訳はすべて端末内で行われ、ページ本文も翻訳結果も外部に送られません。
+          翻訳はすべて端末内で行われ、ページ本文も翻訳結果も外部サーバには送信されません。
         </p>
         <div class="hero__cta">
           <a
@@ -175,6 +175,13 @@
 
           <dt>ネットワーク</dt>
           <dd>初回のモデルダウンロード時のみ必要</dd>
+
+          <dt>Prompt API</dt>
+          <dd>
+            Gemini Nano は Chrome が初回利用時にダウンロードします。環境によっては
+            <code>chrome://flags</code> で built-in AI / Gemini Nano 関連の設定を有効にし、
+            <code>chrome://on-device-internals</code> でモデル状態を確認する必要があります。
+          </dd>
         </dl>
       </section>
     </main>

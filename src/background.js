@@ -2,5 +2,5 @@
 "use strict";
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("[EN Gloss Reader] installed");
+  // No startup work required.
 });

@@ -113,11 +113,6 @@ Rules:
     return matches.length / text.length >= CJK_RATIO;
   }
 
-  // Truncate for safe console output (spec invariant #15).
-  function preview(text) {
-    return text.length > 30 ? text.slice(0, 30) + "..." : text;
-  }
-
   // Collect translatable paragraph candidates from the chosen root.
   function extractParagraphs() {
     const root = getRoot();
@@ -133,7 +128,6 @@ Rules:
       const text = (el.textContent || "").trim();
       if (text.length < MIN_LEN) continue;
       if (text.length > MAX_LEN) {
-        console.warn(`[EN Gloss] paragraph exceeds ${MAX_LEN} chars, skipping:`, preview(text));
         continue;
       }
       if (!passesCjkFilter(text)) continue;
@@ -215,12 +209,10 @@ Rules:
     let availability;
     try {
       availability = await self.LanguageModel.availability();
-    } catch (e) {
-      console.error("[EN Gloss] availability check failed", e);
+    } catch (_) {
       showBanner("Gemini Nano availability check failed", "error");
       return null;
     }
-    console.log("[EN Gloss] LanguageModel availability:", availability);
     if (availability === "unavailable") {
       showBanner("このデバイスではGemini Nanoが利用できません", "error");
       return null;
@@ -240,7 +232,6 @@ Rules:
         monitor(m) {
           m.addEventListener("downloadprogress", (e) => {
             const pct = Math.round((e.loaded || 0) * 100);
-            console.log(`[EN Gloss] download progress: ${pct}%`);
             showBanner(`Gemini Nano モデルをダウンロード中… ${pct}%`, "info");
           });
         },
@@ -248,8 +239,7 @@ Rules:
       sessionInstance = session;
       showBanner("Gemini Nano ready", "info", 2000);
       return session;
-    } catch (e) {
-      console.error("[EN Gloss] session creation failed", e);
+    } catch (_) {
       showBanner("Gemini Nano セッションの作成に失敗しました", "error");
       return null;
     }
@@ -282,7 +272,6 @@ Rules:
   // on cache hits or single-shot fallback paths.
   async function translateOne(jaText, onProgress) {
     if (translationCache.has(jaText)) {
-      console.log("[EN Gloss] cache hit:", preview(jaText));
       return translationCache.get(jaText);
     }
     const session = await getSession();
@@ -308,25 +297,15 @@ Rules:
           if (partial) onProgress(partial);
         }
       }
-    } catch (e) {
-      console.error("[EN Gloss] streaming failed", e);
+    } catch (_) {
       return null;
     }
     let parsed;
     try {
       parsed = JSON.parse(acc);
-    } catch (e) {
-      console.error("[EN Gloss] JSON parse failed for:", preview(acc || ""), e);
+    } catch (_) {
       return null;
     }
-    // Diagnostic: surface counts so under-glossing / over-glossing is easy to
-    // catch without manually inspecting each rendered paragraph.
-    const gn = Array.isArray(parsed.glosses) ? parsed.glosses.length : 0;
-    const vn = Array.isArray(parsed.verbs) ? parsed.verbs.length : 0;
-    console.log(
-      `[EN Gloss] result: glosses=${gn} verbs=${vn} ::`,
-      preview(parsed.en || "")
-    );
     translationCache.set(jaText, parsed);
     return parsed;
   }
@@ -570,14 +549,12 @@ Rules:
   // Translate every extracted paragraph in parallel (cap=2) with progress UI.
   async function runAll() {
     if (runInFlight) {
-      console.log("[EN Gloss] run already in flight, ignoring");
       return { count: 0, success: 0, failure: 0, skipped: true };
     }
     runInFlight = true;
     try {
       injectStyles();
       const candidates = extractParagraphs();
-      console.log(`[EN Gloss] ${candidates.length} paragraph(s) to translate`);
       if (candidates.length === 0) {
         showBanner("翻訳対象の段落が見つかりませんでした", "info", 3000);
         return { count: 0, success: 0, failure: 0 };
@@ -608,7 +585,6 @@ Rules:
         ? `完了。${success}段落を翻訳しました。`
         : `完了。成功 ${success} / 失敗 ${failure}（合計 ${total}）`;
       showBanner(msg, failure === 0 ? "done" : "error", failure === 0 ? 3000 : 0);
-      console.log(`[EN Gloss] done. success=${success} failure=${failure}`);
       return { count: total, success, failure };
     } finally {
       runInFlight = false;
@@ -635,7 +611,6 @@ Rules:
       el.removeAttribute("data-engloss-orig");
       restored++;
     }
-    console.log(`[EN Gloss] restored ${restored} paragraph(s)`);
     if (restored > 0) {
       showBanner(`${restored}段落を元に戻しました。`, "done", 2500);
     } else {
@@ -679,13 +654,10 @@ Rules:
       const data = await chrome.storage.sync.get({ siteAutoRun: {} });
       const map = (data && data.siteAutoRun) || {};
       if (!map[host]) return;
-      console.log("[EN Gloss] auto-run enabled for host:", host);
       runAll();
-    } catch (e) {
-      console.error("[EN Gloss] auto-run check failed", e);
+    } catch (_) {
     }
   }
 
-  console.log("[EN Gloss] content.js ready");
   maybeAutoRun();
 })();

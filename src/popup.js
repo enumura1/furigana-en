@@ -114,8 +114,7 @@
         const map = data.siteAutoRun || {};
         autoRunBox.checked = !!map[host];
         renderStatus(autoRunBox.checked, true);
-      } catch (e) {
-        console.error("[EN Gloss popup] storage read failed", e);
+      } catch (_) {
         renderStatus(false, true);
       }
     }
@@ -134,8 +133,7 @@
           delete map[host];
         }
         await chrome.storage.sync.set({ siteAutoRun: map });
-      } catch (e) {
-        console.error("[EN Gloss popup] storage write failed", e);
+      } catch (_) {
       }
     });
 
