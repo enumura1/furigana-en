@@ -1,8 +1,8 @@
 # Fixtures
 
 Manual test pages for the extension. Because the content script only matches
-`http://*/*` and `https://*/*`, you must serve these files via a local HTTP
-server rather than opening them with `file://`.
+`https://*/*`, you must serve these files via a local HTTPS server rather
+than opening them with `file://` or plain HTTP.
 
 ```bash
 cd test/fixtures

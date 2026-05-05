@@ -66,6 +66,11 @@ The permissions it does request are:
 - `storage` — to persist the user setting described above.
 - `activeTab` — to act on the tab the user explicitly invoked the
   popup on.
+- `https://*/*` (declared as `content_scripts.matches`) — the content
+  script is injected on HTTPS pages so it can respond to the user's
+  click on "Run on this page" or to auto-run for an opted-in host.
+  Page text is only read when one of those gestures occurs. HTTP
+  pages are intentionally excluded.
 
 ## Contact
 
