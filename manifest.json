@@ -7,7 +7,7 @@
   "author": "enumura1",
   "homepage_url": "https://github.com/enumura1/furigana-en",
   "minimum_chrome_version": "140",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab"],
   "action": {
     "default_title": "EN Gloss Reader",
     "default_popup": "src/popup.html",
@@ -29,7 +29,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": ["https://*/*"],
       "js": ["src/content.js"],
       "run_at": "document_idle"
     }

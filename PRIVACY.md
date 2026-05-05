@@ -66,8 +66,6 @@ The permissions it does request are:
 - `storage` — to persist the user setting described above.
 - `activeTab` — to act on the tab the user explicitly invoked the
   popup on.
-- `scripting` — to re-inject the content script if the active tab
-  pre-existed the extension's installation.
 
 ## Contact
 

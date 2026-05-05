@@ -45,23 +45,16 @@
   // Pages where content scripts cannot run.
   function isUnsupportedUrl(url) {
     if (!url) return true;
-    if (url === "about:blank") return true;
-    return /^(chrome|chrome-extension|edge|about|view-source|file|devtools):/i.test(url);
+    try {
+      return new URL(url).protocol !== "https:";
+    } catch (_) {
+      return true;
+    }
   }
 
-  // Send a message to the tab's content script. If the script was never
-  // injected (e.g. the tab pre-existed extension install), inject it once
-  // via chrome.scripting and retry.
-  async function sendWithReinject(tabId, msg) {
-    try {
-      return await chrome.tabs.sendMessage(tabId, msg);
-    } catch (_) {
-      await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ["src/content.js"],
-      });
-      return await chrome.tabs.sendMessage(tabId, msg);
-    }
+  // Send a message to the content script already injected by manifest matches.
+  async function sendToContentScript(tabId, msg) {
+    return await chrome.tabs.sendMessage(tabId, msg);
   }
 
   // Common dispatcher for run / restore buttons.
@@ -79,14 +72,14 @@
       return;
     }
     if (isUnsupportedUrl(tab.url)) {
-      showError("このページでは利用できません（chrome:// など）");
+      showError("この拡張機能は HTTPS ページでのみ利用できます");
       return;
     }
     try {
-      await sendWithReinject(tab.id, { type: type });
+      await sendToContentScript(tab.id, { type: type });
       window.close();
     } catch (e) {
-      showError("コンテンツスクリプトに接続できません: " + (e && e.message ? e.message : e));
+      showError("ページを再読み込みしてから、もう一度実行してください");
     }
   }
 
