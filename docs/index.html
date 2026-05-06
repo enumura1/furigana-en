@@ -43,7 +43,7 @@
         <p class="hero__lead">
           開いている日本語ページを、Chrome 内蔵の Gemini Nano が段落ごとに英語へ翻訳します。
           難しい単語の下にだけ小さく日本語訳が添えられるので、知らない単語で読みが止まりません。
-          翻訳はすべて端末内で行われ、ページ本文も翻訳結果も外部サーバには送信されません。
+          本拡張はページ本文や翻訳結果を外部サーバには送信しません。
         </p>
         <div class="hero__cta">
           <a
@@ -100,9 +100,9 @@
 
         <div class="features">
           <div class="feature">
-            <h3>端末内ですべて処理</h3>
+            <h3>外部サーバに本文を送信しない</h3>
             <p>
-              翻訳は Chrome 内蔵の Gemini Nano が端末内で実行します。ページ本文も翻訳結果も外部サーバには送信しません。
+              翻訳には Chrome 内蔵の Gemini Nano（Prompt API）を使用します。ページ本文も翻訳結果も外部サーバには送信しません。
             </p>
           </div>
           <div class="feature">
@@ -178,9 +178,17 @@
 
           <dt>Prompt API</dt>
           <dd>
-            Gemini Nano は Chrome が初回利用時にダウンロードします。環境によっては
+            Prompt API の利用可否や Gemini Nano の設定条件は Chrome の built-in AI の仕様に従います。環境によっては
             <code>chrome://flags</code> で built-in AI / Gemini Nano 関連の設定を有効にし、
             <code>chrome://on-device-internals</code> でモデル状態を確認する必要があります。
+            詳細は
+            <a
+              href="https://developer.chrome.com/docs/ai/prompt-api"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Google の Prompt API ドキュメント</a
+            >
+            を確認してください。
           </dd>
         </dl>
       </section>

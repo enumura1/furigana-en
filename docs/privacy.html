@@ -6,7 +6,7 @@
     <title>プライバシーポリシー — EN Gloss Reader</title>
     <meta
       name="description"
-      content="EN Gloss Reader のプライバシーポリシー。すべての翻訳は端末内で実行され、ページ本文や翻訳結果は外部に送信されません。"
+      content="EN Gloss Reader のプライバシーポリシー。ページ本文や翻訳結果は外部サーバに送信されません。"
     />
     <link rel="icon" type="image/png" sizes="48x48" href="./assets/icon-48.png" />
     <link rel="icon" type="image/png" sizes="128x128" href="./assets/icon-128.png" />
@@ -37,10 +37,18 @@
         <p class="prose__updated">最終更新: 2026-04-26</p>
 
         <p>
-          EN Gloss Reader（以下「本拡張」）は、ユーザーのデータを端末の外に出さない方針で設計されています。
-          すべての翻訳は Chrome 内蔵の Gemini Nano（Prompt API）が端末内でローカルに実行し、
-          本拡張はページ本文や翻訳結果を外部サーバに送信しません。
-          初回利用時には、Chrome が Google から Gemini Nano モデルをダウンロードする場合があります。
+          EN Gloss Reader（以下「本拡張」）は、ページ本文や翻訳結果を外部サーバに送信しない方針で設計されています。
+          翻訳には Chrome 内蔵の Gemini Nano（Prompt API）を使用します。
+          本拡張自身は翻訳のためのネットワークリクエストを行いません。
+          Prompt API の利用可否や Gemini Nano の設定条件は Chrome の built-in AI の仕様に従います。
+          詳細は
+          <a
+            href="https://developer.chrome.com/docs/ai/prompt-api"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Google の Prompt API ドキュメント</a
+          >
+          を確認してください。
         </p>
 
         <h2>収集するデータ</h2>
@@ -66,7 +74,7 @@
             をブラウザのメモリに読み込みます。
           </li>
           <li>
-            読み込んだテキストは <strong>端末内で動作する Chrome 内蔵 Gemini Nano</strong> に渡され、
+            読み込んだテキストは <strong>Chrome 内蔵 Gemini Nano（Prompt API）</strong> に渡され、
             英訳と日本語訳の付与が生成されます。
           </li>
           <li>
@@ -99,8 +107,8 @@
         <h2>第三者提供</h2>
         <p>
           本拡張はページ本文、翻訳結果、設定情報を第三者と共有しません。
-          初回利用時には、Chrome が Google から Gemini Nano モデルをダウンロードする場合があります。
-          このモデルダウンロードは Chrome によって行われ、本拡張がページ本文や翻訳結果を送信するものではありません。
+          本拡張には、利用状況の分析、広告、トラッキング、エラー報告のために
+          外部サービスへデータを送信する仕組みは含まれていません。
         </p>
 
         <h2>分析・トラッキング</h2>
