@@ -19,9 +19,9 @@ stuck on unfamiliar vocabulary.
 > with the verb "exhibits" tinted pink and Japanese glosses (示す, 顕著な,
 > 収束) sitting underneath the corresponding English words.
 
-All processing happens on-device through Chrome's bundled Gemini Nano.
+Translations use Chrome's bundled Gemini Nano (Prompt API).
 **No page bodies or translation results are sent to any external
-server.** See the
+server by the extension.** See the
 [privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
 (or [PRIVACY.md](./PRIVACY.md) in this repo) for details.
 
@@ -36,11 +36,10 @@ server.** See the
 - See Chrome's [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api)
   for the canonical, up-to-date hardware and platform matrix.
 
-The Gemini Nano model is downloaded by Chrome on first use when it is
-not already present. If the Prompt API is unavailable on your Chrome
-build, check Chrome's current built-in AI setup instructions. Depending
-on the Chrome version/channel, you may need to enable related flags such
-as:
+Prompt API availability and Gemini Nano setup depend on Chrome's
+built-in AI requirements. If the Prompt API is unavailable on your
+Chrome build, check Google's current setup instructions. Depending on
+the Chrome version/channel, related flags may include:
 
 - `chrome://flags/#optimization-guide-on-device-model`
 - `chrome://flags/#prompt-api-for-gemini-nano`
@@ -117,8 +116,8 @@ This fails if production source contains DevTools console logging.
 ## Privacy
 
 Page bodies and translation results are never sent to external servers
-by the extension, and never persisted. Chrome may download Gemini Nano
-on first use. See the
+by the extension, and never persisted. Prompt API availability and
+Gemini Nano setup depend on Chrome's built-in AI requirements. See the
 [hosted privacy policy](https://enumura1.github.io/furigana-en/privacy.html)
 (or [PRIVACY.md](./PRIVACY.md) in this repo) for the full statement.
 

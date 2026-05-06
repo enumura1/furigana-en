@@ -1,10 +1,12 @@
 # Privacy Policy
 
-EN Gloss Reader (the "extension") is designed to keep all user data on
-the device. Every translation is performed by Chrome's built-in Gemini
-Nano (Prompt API) running locally; the extension never sends page
-content or translation results to external servers. Chrome may download
-Gemini Nano from Google on first use.
+EN Gloss Reader (the "extension") is designed to avoid sending page
+content and translation results to external servers. Translations are
+performed through Chrome's built-in Gemini Nano (Prompt API). The
+extension does not make network requests for translation. Prompt API
+availability and Gemini Nano setup depend on Chrome's built-in AI
+requirements; see Google's
+[Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api).
 
 ## Data collected
 
@@ -25,9 +27,8 @@ author cannot read it.
   extension reads the body paragraphs of the active tab — the
   `<p>`, `<li>`, `<blockquote>`, `<dd>`, `<dt>`, and `<h1>`–`<h6>`
   elements — into browser memory.
-- That text is handed to **Chrome's built-in Gemini Nano running
-  locally**, which produces the English translation and Japanese
-  glosses.
+- That text is handed to **Chrome's built-in Gemini Nano (Prompt
+  API)**, which produces the English translation and Japanese glosses.
 - **No page content or translation results are sent to external
   servers.** The source code contains
   no `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, or
@@ -50,9 +51,9 @@ author cannot read it.
 ## Third parties
 
 The extension does not share page content, translation results, or
-settings with any third party. Chrome may download the Gemini Nano model
-from Google on first use; that model download is handled by Chrome, not
-by this extension.
+settings with any third party. It does not include mechanisms that send
+data to external services for analytics, advertising, tracking, or error
+reporting.
 
 ## Analytics and tracking
 
